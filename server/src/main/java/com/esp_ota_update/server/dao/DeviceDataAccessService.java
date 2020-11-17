@@ -44,21 +44,12 @@ public class DeviceDataAccessService implements DeviceDao {
     }
 
     @Override
-    public int updateDeviceById(UUID id, Device device) {
-//        int originalDeviceIndex = DB.indexOf(selectDeviceById(id));
-//
-//        if(originalDeviceIndex >= 0){
-//            DB.set(originalDeviceIndex, new Device(id, device.getName()));
-//            return 1;
-//        }
-//
-//        return 0;
-
+    public int updateDeviceById(UUID id, Device deviceToUpdate) {
         return selectDeviceById(id)
-                .map(device1 -> {
-                    int deviceIndex = DB.indexOf(device1);
+                .map(device -> {
+                    int deviceIndex = DB.indexOf(device);
                     if (deviceIndex >= 0) {
-                        DB.set(deviceIndex, new Device(id, device.getName()));
+                        DB.set(deviceIndex, new Device(id, deviceToUpdate.getName()));
                         return 1;
                     }
 
