@@ -29,7 +29,15 @@ public class DeviceService {
     }
 
     public Optional<Device> getDeviceById(UUID id) {
-        return deviceDao.selectPersonById(id);
+        return deviceDao.selectDeviceById(id);
+    }
+
+    public int deleteDevice(UUID id){
+        return deviceDao.deleteDeviceById(id);
+    }
+
+    public int updateDevice(UUID id, Device device){
+        return deviceDao.updateDeviceById(id, device);
     }
 
 }

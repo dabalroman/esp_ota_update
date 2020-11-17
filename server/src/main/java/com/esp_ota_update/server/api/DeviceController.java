@@ -15,12 +15,12 @@ public class DeviceController {
     private final DeviceService deviceService;
 
     @Autowired
-    public DeviceController(DeviceService deviceService){
+    public DeviceController(DeviceService deviceService) {
         this.deviceService = deviceService;
     }
 
     @PostMapping
-    public void addDevice(@RequestBody Device device){
+    public void addDevice(@RequestBody Device device) {
         deviceService.addDevice(device);
     }
 
@@ -30,9 +30,18 @@ public class DeviceController {
     }
 
     @GetMapping(path = "{id}")
-    public Device getPersonById(@PathVariable("id") UUID id) {
+    public Device getDeviceById(@PathVariable("id") UUID id) {
         return deviceService.getDeviceById(id)
                 .orElse(null);
     }
 
+    @DeleteMapping(path = "{id}")
+    public void deleteDeviceById(@PathVariable("id") UUID id) {
+        deviceService.deleteDevice(id);
+    }
+
+    @PutMapping(path = "{id}")
+    public void updateDeviceById(@PathVariable("id") UUID id, @RequestBody Device device) {
+        deviceService.updateDevice(id, device);
+    }
 }

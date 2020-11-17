@@ -19,7 +19,7 @@ public interface DeviceDao {
 
     List<Device> selectAllDevices();
 
-    Optional<Device> selectPersonById(UUID id);
+    Optional<Device> selectDeviceById(UUID id);
 
     int deleteDeviceById(UUID id);
 

@@ -25,7 +25,7 @@ public class DeviceDataAccessService implements DeviceDao {
     }
 
     @Override
-    public Optional<Device> selectPersonById(UUID id) {
+    public Optional<Device> selectDeviceById(UUID id) {
         return DB.stream()
                 .filter(device -> device.getId().equals(id))
                 .findFirst();
@@ -33,11 +33,36 @@ public class DeviceDataAccessService implements DeviceDao {
 
     @Override
     public int deleteDeviceById(UUID id) {
+        Optional<Device> device = selectDeviceById(id);
+
+        if(device.isPresent()){
+            DB.remove(device.get());
+            return 1;
+        }
+
         return 0;
     }
 
     @Override
     public int updateDeviceById(UUID id, Device device) {
-        return 0;
+//        int originalDeviceIndex = DB.indexOf(selectDeviceById(id));
+//
+//        if(originalDeviceIndex >= 0){
+//            DB.set(originalDeviceIndex, new Device(id, device.getName()));
+//            return 1;
+//        }
+//
+//        return 0;
+
+        return selectDeviceById(id)
+                .map(device1 -> {
+                    int deviceIndex = DB.indexOf(device1);
+                    if (deviceIndex >= 0) {
+                        DB.set(deviceIndex, new Device(id, device.getName()));
+                        return 1;
+                    }
+
+                    return 0;
+                }).orElse(0);
     }
 }
