@@ -16,7 +16,7 @@ public class DeviceService {
     private final DeviceDao deviceDao;
 
     @Autowired
-    public DeviceService(@Qualifier("deviceDao") DeviceDao deviceDao) {
+    public DeviceService(@Qualifier("H2") DeviceDao deviceDao) {
         this.deviceDao = deviceDao;
     }
 
