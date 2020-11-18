@@ -3,8 +3,10 @@ package com.esp_ota_update.server.api;
 import com.esp_ota_update.server.model.Device;
 import com.esp_ota_update.server.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +22,7 @@ public class DeviceController {
     }
 
     @PostMapping
-    public void addDevice(@RequestBody Device device) {
+    public void addDevice(@Valid @NonNull @RequestBody Device device) {
         deviceService.addDevice(device);
     }
 
@@ -41,7 +43,7 @@ public class DeviceController {
     }
 
     @PutMapping(path = "{id}")
-    public void updateDeviceById(@PathVariable("id") UUID id, @RequestBody Device device) {
+    public void updateDeviceById(@PathVariable("id") UUID id, @Valid @NonNull @RequestBody Device device) {
         deviceService.updateDevice(id, device);
     }
 }
