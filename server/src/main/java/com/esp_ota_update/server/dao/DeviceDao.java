@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-//Fake dao
-//to be replaced with h2
 public interface DeviceDao {
 
     int insertDevice(UUID id, Device device);
