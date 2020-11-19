@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 
 @RequestMapping("api/v1/device")
 @RestController
@@ -32,18 +31,18 @@ public class DeviceController {
     }
 
     @GetMapping(path = "{id}")
-    public Device getDeviceById(@PathVariable("id") UUID id) {
+    public Device getDeviceById(@PathVariable("id") int id) {
         return deviceService.getDeviceById(id)
                 .orElse(null);
     }
 
     @DeleteMapping(path = "{id}")
-    public void deleteDeviceById(@PathVariable("id") UUID id) {
+    public void deleteDeviceById(@PathVariable("id") int id) {
         deviceService.deleteDevice(id);
     }
 
     @PutMapping(path = "{id}")
-    public void updateDeviceById(@PathVariable("id") UUID id, @Valid @NonNull @RequestBody Device device) {
+    public void updateDeviceById(@PathVariable("id") int id, @Valid @NonNull @RequestBody Device device) {
         deviceService.updateDevice(id, device);
     }
 }

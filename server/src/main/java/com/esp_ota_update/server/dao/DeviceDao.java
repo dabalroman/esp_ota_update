@@ -4,22 +4,16 @@ import com.esp_ota_update.server.model.Device;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface DeviceDao {
 
-    int insertDevice(UUID id, Device device);
-
-    default int insertDevice(Device device) {
-        UUID id = UUID.randomUUID();
-        return insertDevice(id, device);
-    }
+    int insertDevice(Device device);
 
     List<Device> selectAllDevices();
 
-    Optional<Device> selectDeviceById(UUID id);
+    Optional<Device> selectDeviceById(int id);
 
-    int deleteDeviceById(UUID id);
+    int deleteDeviceById(int id);
 
-    int updateDeviceById(UUID id, Device device);
+    int updateDeviceById(int id, Device device);
 }

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class DeviceService {
@@ -28,16 +27,15 @@ public class DeviceService {
         return deviceDao.selectAllDevices();
     }
 
-    public Optional<Device> getDeviceById(UUID id) {
+    public Optional<Device> getDeviceById(int id) {
         return deviceDao.selectDeviceById(id);
     }
 
-    public int deleteDevice(UUID id){
+    public int deleteDevice(int id) {
         return deviceDao.deleteDeviceById(id);
     }
 
-    public int updateDevice(UUID id, Device device){
+    public int updateDevice(int id, Device device) {
         return deviceDao.updateDeviceById(id, device);
     }
-
 }
