@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("SqlResolve")
 @Repository("H2")
 public class H2DeviceDataAccessService implements DeviceDao {
 
@@ -64,3 +65,5 @@ public class H2DeviceDataAccessService implements DeviceDao {
         return jdbcTemplate.update(sql, device.getName(), id);
     }
 }
+
+
