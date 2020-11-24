@@ -1,6 +1,6 @@
 package com.esp_ota_update.server.dao;
 
-import com.esp_ota_update.server.datasource.DeviceMapper;
+import com.esp_ota_update.server.model.DeviceMapper;
 import com.esp_ota_update.server.model.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

@@ -1,6 +1,5 @@
-package com.esp_ota_update.server.datasource;
+package com.esp_ota_update.server.model;
 
-import com.esp_ota_update.server.model.Device;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
