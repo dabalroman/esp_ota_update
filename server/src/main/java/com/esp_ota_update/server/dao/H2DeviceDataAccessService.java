@@ -1,5 +1,6 @@
 package com.esp_ota_update.server.dao;
 
+import com.esp_ota_update.server.datasource.DeviceMapper;
 import com.esp_ota_update.server.model.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,9 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-@SuppressWarnings("SqlResolve")
 @Repository("H2")
 public class H2DeviceDataAccessService implements DeviceDao {
 
@@ -21,45 +20,48 @@ public class H2DeviceDataAccessService implements DeviceDao {
     }
 
     @Override
-    public int insertDevice(UUID id, Device device) {
-        final String sql = "INSERT INTO device (id, name) VALUES (?, ?)";
+    public int insertDevice(Device device) {
+        final String sql =
+                "INSERT INTO device (name, mac, software_name_scheme, status, last_checked, last_updated) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
 
-        return jdbcTemplate.update(sql, id, device.getName());
+        return jdbcTemplate.update(
+                sql,
+                device.getName(),
+                device.getMac(),
+                device.getSoftwareNameScheme(),
+                device.getStatus(),
+                device.getLastChecked(),
+                device.getLastUpdated()
+        );
     }
 
     @Override
     public List<Device> selectAllDevices() {
-        final String sql = "SELECT id, name FROM device";
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_checked, last_updated FROM device";
 
-        return jdbcTemplate.query(sql, ((resultSet, i) -> {
-            UUID id = UUID.fromString(resultSet.getString("id"));
-            String name = resultSet.getString("name");
-            return new Device(id, name);
-        }));
+        return jdbcTemplate.query(sql, new DeviceMapper());
     }
 
     @Override
-    public Optional<Device> selectDeviceById(UUID id) {
-        final String sql = "SELECT id, name FROM device WHERE id = ?";
+    public Optional<Device> selectDeviceById(int id) {
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_checked, last_updated"
+                + " FROM device WHERE id = ?";
 
-        Device device = jdbcTemplate.queryForObject(sql, ((resultSet, i) -> {
-            UUID deviceId = UUID.fromString(resultSet.getString("id"));
-            String name = resultSet.getString("name");
-            return new Device(deviceId, name);
-        }), id);
+        List<Device> devices = jdbcTemplate.query(sql, new DeviceMapper(), id);
 
-        return Optional.ofNullable(device);
+        return Optional.ofNullable(devices.size() > 0 ? devices.get(0) : null);
     }
 
     @Override
-    public int deleteDeviceById(UUID id) {
+    public int deleteDeviceById(int id) {
         final String sql = "DELETE FROM device WHERE id = ?";
 
         return jdbcTemplate.update(sql, id);
     }
 
     @Override
-    public int updateDeviceById(UUID id, Device device) {
+    public int updateDeviceById(int id, Device device) {
         final String sql = "UPDATE DEVICE SET NAME = ? WHERE ID = ?";
 
         return jdbcTemplate.update(sql, device.getName(), id);

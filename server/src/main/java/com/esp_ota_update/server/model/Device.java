@@ -9,43 +9,27 @@ public class Device {
     private final int id;
 
     @NotBlank
-    private final String name;
+    private String name;
 
-    private final String mac;
+    private String mac;
 
-    private final String softwareNameScheme;
+    private String softwareNameScheme;
 
-    private final int status;
+    private int status;
 
-    private final LocalDateTime lastChecked;
+    private LocalDateTime lastChecked;
 
-    private final LocalDateTime lastUpdated;
+    private LocalDateTime lastUpdated;
 
-
-    public Device(
-            int id,
-            String name,
-            String mac,
-            String softwareNameScheme,
-            int status,
-            LocalDateTime lastChecked,
-            LocalDateTime lastUpdated) {
+    public Device(int id) {
         this.id = id;
-        this.name = name;
-        this.mac = mac;
-        this.softwareNameScheme = softwareNameScheme;
-        this.status = status;
-        this.lastChecked = lastChecked;
-        this.lastUpdated = lastUpdated;
     }
 
-    public Device(
-            @JsonProperty("name") String name,
-            @JsonProperty("software_name_scheme") String softwareNameScheme) {
+    public Device(@JsonProperty("name") String name) {
         this.id = -1;
         this.name = name;
         this.mac = "";
-        this.softwareNameScheme = softwareNameScheme;
+        this.softwareNameScheme = "";
         this.status = 0;
         this.lastChecked = LocalDateTime.now();
         this.lastUpdated = LocalDateTime.now();
@@ -79,5 +63,27 @@ public class Device {
         return lastUpdated;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    public void setMac(String mac) {
+        this.mac = mac;
+    }
+
+    public void setSoftwareNameScheme(String softwareNameScheme) {
+        this.softwareNameScheme = softwareNameScheme;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public void setLastChecked(LocalDateTime lastChecked) {
+        this.lastChecked = lastChecked;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
 }

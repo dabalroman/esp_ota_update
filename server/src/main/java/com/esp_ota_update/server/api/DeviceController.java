@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("api/v1/device")
 @RestController
@@ -31,9 +32,8 @@ public class DeviceController {
     }
 
     @GetMapping(path = "{id}")
-    public Device getDeviceById(@PathVariable("id") int id) {
-        return deviceService.getDeviceById(id)
-                .orElse(null);
+    public Optional<Device> getDeviceById(@PathVariable("id") int id) {
+        return deviceService.getDeviceById(id);
     }
 
     @DeleteMapping(path = "{id}")
