@@ -1,14 +1,14 @@
 package com.esp_ota_update.server.dao;
 
-import com.esp_ota_update.server.model.DeviceMapper;
 import com.esp_ota_update.server.model.Device;
+import com.esp_ota_update.server.model.DeviceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
+@SuppressWarnings("SqlResolve")
 @Repository("H2")
 public class H2DeviceDataAccessService implements DeviceDao {
 
@@ -44,13 +44,11 @@ public class H2DeviceDataAccessService implements DeviceDao {
     }
 
     @Override
-    public Optional<Device> selectDeviceById(int id) {
+    public List<Device> selectDeviceById(int id) {
         final String sql = "SELECT id, name, mac, software_name_scheme, status, last_checked, last_updated"
                 + " FROM device WHERE id = ?";
 
-        List<Device> devices = jdbcTemplate.query(sql, new DeviceMapper(), id);
-
-        return Optional.ofNullable(devices.size() > 0 ? devices.get(0) : null);
+        return jdbcTemplate.query(sql, new DeviceMapper(), id);
     }
 
     @Override
@@ -62,9 +60,16 @@ public class H2DeviceDataAccessService implements DeviceDao {
 
     @Override
     public int updateDeviceById(int id, Device device) {
-        final String sql = "UPDATE DEVICE SET NAME = ? WHERE ID = ?";
+        final String sql = "UPDATE device SET name = ?, mac = ?, software_name_scheme = ?, status = ? WHERE ID = ?";
 
-        return jdbcTemplate.update(sql, device.getName(), id);
+        return jdbcTemplate.update(
+                sql,
+                device.getName(),
+                device.getMac(),
+                device.getSoftwareNameScheme(),
+                device.getStatus(),
+                id
+        );
     }
 }
 
