@@ -1,6 +1,7 @@
 package com.esp_ota_update.server.api;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 public class Response {
     public final boolean success;
@@ -16,5 +17,11 @@ public class Response {
     Response(boolean success, HttpStatus status){
         this.success = success;
         this.status = status.value();
+    }
+
+    public ResponseEntity<Response> get(){
+        return ResponseEntity
+                .status(this.status)
+                .body(this);
     }
 }
