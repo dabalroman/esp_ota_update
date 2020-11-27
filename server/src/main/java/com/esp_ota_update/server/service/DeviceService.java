@@ -14,7 +14,7 @@ public class DeviceService {
     private final DeviceDao deviceDao;
 
     @Autowired
-    public DeviceService(@Qualifier("H2") DeviceDao deviceDao) {
+    public DeviceService(@Qualifier("H2-Device") DeviceDao deviceDao) {
         this.deviceDao = deviceDao;
     }
 
@@ -36,5 +36,9 @@ public class DeviceService {
 
     public void updateDevice(int id, Device device) {
         deviceDao.updateDeviceById(id, device);
+    }
+
+    public void updateDevice(Device device) {
+        deviceDao.updateDeviceById(device.getId(), device);
     }
 }

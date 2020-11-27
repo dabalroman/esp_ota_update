@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @SuppressWarnings("SqlResolve")
-@Repository("H2")
+@Repository("H2-Device")
 public class DeviceDataAccessService implements DeviceDao {
 
     private final JdbcTemplate jdbcTemplate;
