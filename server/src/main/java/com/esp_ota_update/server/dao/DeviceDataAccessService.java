@@ -10,12 +10,12 @@ import java.util.List;
 
 @SuppressWarnings("SqlResolve")
 @Repository("H2")
-public class H2DeviceDataAccessService implements DeviceDao {
+public class DeviceDataAccessService implements DeviceDao {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public H2DeviceDataAccessService(JdbcTemplate jdbcTemplate) {
+    public DeviceDataAccessService(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -60,7 +60,8 @@ public class H2DeviceDataAccessService implements DeviceDao {
 
     @Override
     public int updateDeviceById(int id, Device device) {
-        final String sql = "UPDATE device SET name = ?, mac = ?, software_name_scheme = ?, status = ? WHERE ID = ?";
+        final String sql = "UPDATE device SET name = ?, mac = ?, software_name_scheme = ?, status = ?, "
+                + "last_checked = ?, last_updated = ? WHERE ID = ?";
 
         return jdbcTemplate.update(
                 sql,
@@ -68,6 +69,8 @@ public class H2DeviceDataAccessService implements DeviceDao {
                 device.getMac(),
                 device.getSoftwareNameScheme(),
                 device.getStatus(),
+                device.getLastChecked(),
+                device.getLastUpdated(),
                 id
         );
     }
