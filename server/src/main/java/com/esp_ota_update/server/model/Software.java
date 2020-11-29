@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class Software {
-    private final int id;
+    private final Integer id;
 
     private Integer deviceId;
     private Integer previousVersionId;
@@ -23,12 +23,12 @@ public class Software {
     }
 
     public Software(@JsonProperty("version") String version) {
-        this.id = -1;
+        this.id = null;
         this.version = version;
-        this.deviceId = 0;
-        this.previousVersionId = 0;
-        this.file = "";
-        this.md5 = "";
+        this.deviceId = null;
+        this.previousVersionId = null;
+        this.file = null;
+        this.md5 = null;
         this.createdAt = LocalDateTime.now();
     }
 

@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class Device {
-    private final int id;
+    private final Integer id;
 
     @NotBlank
     private String name;
@@ -17,22 +17,22 @@ public class Device {
 
     private Integer status;
 
-    private LocalDateTime lastChecked;
+    private LocalDateTime lastSoftwareCheck;
 
-    private LocalDateTime lastUpdated;
+    private LocalDateTime lastSoftwareUpdate;
 
     public Device(int id) {
         this.id = id;
     }
 
     public Device(@JsonProperty("name") String name) {
-        this.id = -1;
+        this.id = null;
         this.name = name;
-        this.mac = "";
-        this.softwareNameScheme = "";
-        this.status = 0;
-        this.lastChecked = LocalDateTime.now();
-        this.lastUpdated = LocalDateTime.now();
+        this.mac = null;
+        this.softwareNameScheme = null;
+        this.status = null;
+        this.lastSoftwareCheck = LocalDateTime.now();
+        this.lastSoftwareUpdate = LocalDateTime.now();
     }
 
     public Integer getId() {
@@ -71,19 +71,19 @@ public class Device {
         this.status = status;
     }
 
-    public LocalDateTime getLastChecked() {
-        return lastChecked;
+    public LocalDateTime getLastSoftwareCheck() {
+        return lastSoftwareCheck;
     }
 
-    public void setLastChecked(LocalDateTime lastChecked) {
-        this.lastChecked = lastChecked;
+    public void setLastSoftwareCheck(LocalDateTime lastSoftwareCheck) {
+        this.lastSoftwareCheck = lastSoftwareCheck;
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
+    public LocalDateTime getLastSoftwareUpdate() {
+        return lastSoftwareUpdate;
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    public void setLastSoftwareUpdate(LocalDateTime lastSoftwareUpdate) {
+        this.lastSoftwareUpdate = lastSoftwareUpdate;
     }
 }

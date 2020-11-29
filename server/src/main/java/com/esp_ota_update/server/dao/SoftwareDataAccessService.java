@@ -70,6 +70,7 @@ public class SoftwareDataAccessService implements SoftwareDao {
                 software.getMd5(),
                 software.getCreatedAt(),
                 software.getDeviceId(),
+                software.getPreviousVersionId(),
                 id
         );
     }
