@@ -11,12 +11,24 @@ public class DeviceMapper implements RowMapper<Device> {
     public Device mapRow(ResultSet rs, int rowNum) throws SQLException {
         Device device = new Device(rs.getInt("id"));
 
-        device.setMac(rs.getString("mac"));
         device.setName(rs.getString("name"));
-        device.setSoftwareNameScheme(rs.getString("software_name_scheme"));
-        device.setStatus(rs.getInt("status"));
         device.setLastChecked(rs.getTimestamp("last_checked").toLocalDateTime());
         device.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
+
+        device.setMac(rs.getString("mac"));
+        if(rs.wasNull()){
+            device.setMac(null);
+        }
+
+        device.setSoftwareNameScheme(rs.getString("software_name_scheme"));
+        if(rs.wasNull()){
+            device.setSoftwareNameScheme(null);
+        }
+
+        device.setStatus(rs.getInt("status"));
+        if(rs.wasNull()){
+            device.setStatus(null);
+        }
 
         return device;
     }

@@ -15,7 +15,7 @@ public class Device {
 
     private String softwareNameScheme;
 
-    private int status;
+    private Integer status;
 
     private LocalDateTime lastChecked;
 
@@ -35,7 +35,7 @@ public class Device {
         this.lastUpdated = LocalDateTime.now();
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -43,44 +43,44 @@ public class Device {
         return name;
     }
 
-    public String getMac() {
-        return mac;
-    }
-
-    public String getSoftwareNameScheme() {
-        return softwareNameScheme;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getLastChecked() {
-        return lastChecked;
-    }
-
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMac() {
+        return mac;
     }
 
     public void setMac(String mac) {
         this.mac = mac;
     }
 
+    public String getSoftwareNameScheme() {
+        return softwareNameScheme;
+    }
+
     public void setSoftwareNameScheme(String softwareNameScheme) {
         this.softwareNameScheme = softwareNameScheme;
     }
 
-    public void setStatus(int status) {
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public LocalDateTime getLastChecked() {
+        return lastChecked;
     }
 
     public void setLastChecked(LocalDateTime lastChecked) {
         this.lastChecked = lastChecked;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
     }
 
     public void setLastUpdated(LocalDateTime lastUpdated) {

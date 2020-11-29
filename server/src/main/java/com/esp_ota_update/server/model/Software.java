@@ -8,9 +8,8 @@ import java.time.LocalDateTime;
 public class Software {
     private final int id;
 
-    //TODO: Fix sql id null exception
-    private int deviceId;
-    private int previousVersionId;
+    private Integer deviceId;
+    private Integer previousVersionId;
 
     @NotBlank
     private String version;
@@ -33,15 +32,19 @@ public class Software {
         this.createdAt = LocalDateTime.now();
     }
 
-    public int getDeviceId() {
+    public Integer getDeviceId() {
         return deviceId;
     }
 
-    public int getPreviousVersionId() {
+    public void setDeviceId(Integer deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public Integer getPreviousVersionId() {
         return previousVersionId;
     }
 
-    public void setPreviousVersionId(int previousVersionId) {
+    public void setPreviousVersionId(Integer previousVersionId) {
         this.previousVersionId = previousVersionId;
     }
 
@@ -77,11 +80,7 @@ public class Software {
         this.createdAt = createdAt;
     }
 
-    public void setDeviceId(int deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 }
