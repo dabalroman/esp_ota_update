@@ -34,11 +34,7 @@ public class SoftwareService {
         softwareDao.deleteSoftwareById(id);
     }
 
-    public void updateSoftware(int id, Software software) {
-        softwareDao.updateSoftwareById(id, software);
-    }
-
     public void updateSoftware(Software software) {
-        softwareDao.updateSoftwareById(software.getId(), software);
+        softwareDao.updateSoftware(software);
     }
 }

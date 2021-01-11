@@ -59,8 +59,8 @@ public class SoftwareDataAccessService implements SoftwareDao {
     }
 
     @Override
-    public int updateSoftwareById(int id, Software software) {
-        final String sql = "UPDATE software SET version = ?, file = ?, md5 = ?, created_at = ?, device_id = ?, "
+    public int updateSoftware(Software software) {
+        final String sql = "UPDATE software SET version = ?, file = ?, md5 = ?, device_id = ?, "
                 + "previous_version_id = ? WHERE ID = ?";
 
         return jdbcTemplate.update(
@@ -68,10 +68,9 @@ public class SoftwareDataAccessService implements SoftwareDao {
                 software.getVersion(),
                 software.getFile(),
                 software.getMd5(),
-                software.getCreatedAt(),
                 software.getDeviceId(),
                 software.getPreviousVersionId(),
-                id
+                software.getId()
         );
     }
 }

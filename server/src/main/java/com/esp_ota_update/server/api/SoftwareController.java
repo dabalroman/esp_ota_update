@@ -55,10 +55,15 @@ public class SoftwareController {
     @PutMapping(path = "{id}")
     public ResponseEntity<Response> updateSoftwareById(
             @PathVariable("id") int id,
-            @Valid @NonNull @RequestBody Software software
+            @Valid @NonNull @RequestBody Software update
     ) {
-        softwareService.updateSoftware(id, software);
+        Software base = softwareService.getSoftwareById(id).get(0);
 
-        return new Response(true, HttpStatus.OK).get();
+        if(base.applyUpdate(update)) {
+            softwareService.updateSoftware(base);
+            return new Response(true, HttpStatus.OK).get();
+        }
+
+        return new Response(false, HttpStatus.BAD_REQUEST).get();
     }
 }

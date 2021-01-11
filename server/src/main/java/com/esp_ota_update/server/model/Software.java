@@ -1,8 +1,7 @@
 package com.esp_ota_update.server.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.esp_ota_update.server.util.MD5Checksum;
 
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class Software {
@@ -11,29 +10,61 @@ public class Software {
     private Integer deviceId;
     private Integer previousVersionId;
 
-    @NotBlank
     private String version;
     private String file;
     private String md5;
 
     private LocalDateTime createdAt;
 
-    public Software(int id) {
-        this.id = id;
+    //JSON constructor
+    public Software() {
+        this(0);
     }
 
-    public Software(@JsonProperty("version") String version) {
-        this.id = null;
-        this.version = version;
-        this.deviceId = null;
-        this.previousVersionId = null;
-        this.file = null;
-        this.md5 = null;
+    public Software(int id) {
+        this.id = id;
         this.createdAt = LocalDateTime.now();
     }
 
+    /**
+     * @param update Software
+     * @return true on success
+     */
+    public boolean applyUpdate(Software update) {
+        if (update.getId() != 0) {
+            return false;
+        }
+
+        if (update.getDeviceId() != null && !update.getDeviceId().equals(this.deviceId)) {
+            this.deviceId = update.getDeviceId();
+        }
+
+        if (update.getFile() != null && !update.getFile().equals(this.file)) {
+            this.file = update.getFile();
+            this.md5 = this.calculateFileHash(this.file);
+        }
+
+        if (update.getVersion() != null && !update.getVersion().equals(this.version)) {
+            this.version = update.getVersion();
+        }
+
+        if (update.getPreviousVersionId() != null && !update.getPreviousVersionId().equals(this.previousVersionId)) {
+            this.previousVersionId = update.getPreviousVersionId();
+        }
+
+        return true;
+    }
+
+    private String calculateFileHash(String filePath) {
+        try {
+            return MD5Checksum.get(filePath);
+        } catch (Exception e) {
+            return "md5-error";
+        }
+    }
+
     public Integer getDeviceId() {
-        return deviceId;
+        return this.deviceId;
     }
 
     public void setDeviceId(Integer deviceId) {
