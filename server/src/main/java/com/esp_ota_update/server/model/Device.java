@@ -1,14 +1,10 @@
 package com.esp_ota_update.server.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 public class Device {
     private final Integer id;
 
-    @NotBlank
     private String name;
 
     private String mac;
@@ -25,14 +21,44 @@ public class Device {
         this.id = id;
     }
 
-    public Device(@JsonProperty("name") String name) {
-        this.id = null;
-        this.name = name;
-        this.mac = null;
-        this.softwareNameScheme = null;
-        this.status = null;
-        this.lastSoftwareCheck = LocalDateTime.now();
-        this.lastSoftwareUpdate = LocalDateTime.now();
+    public Device() {
+        this(0);
+    }
+
+    /**
+     * @param update Device
+     * @return true on success
+     */
+    public boolean applyUpdate(Device update) {
+        if (update.getId() != 0) {
+            return false;
+        }
+
+        if (update.getName() != null) {
+            this.name = update.getName();
+        }
+
+        if (update.getMac() != null) {
+            this.mac = update.getMac();
+        }
+
+        if (update.getStatus() != null) {
+            this.status = update.getStatus();
+        }
+
+        if (update.getSoftwareNameScheme() != null) {
+            this.softwareNameScheme = update.getSoftwareNameScheme();
+        }
+
+        if (update.getLastSoftwareCheck() != null) {
+            this.lastSoftwareCheck = update.getLastSoftwareCheck();
+        }
+
+        if (update.getLastSoftwareUpdate() != null) {
+            this.lastSoftwareUpdate = update.getLastSoftwareUpdate();
+        }
+
+        return true;
     }
 
     public Integer getId() {

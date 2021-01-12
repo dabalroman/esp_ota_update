@@ -55,10 +55,15 @@ public class DeviceController {
     @PutMapping(path = "{id}")
     public ResponseEntity<Response> updateDeviceById(
             @PathVariable("id") int id,
-            @Valid @NonNull @RequestBody Device device
+            @Valid @NonNull @RequestBody Device update
     ) {
-        deviceService.updateDevice(id, device);
+        Device base = deviceService.getDeviceById(id).get(0);
 
-        return new Response(true, HttpStatus.OK).get();
+        if (base.applyUpdate(update)) {
+            deviceService.updateDevice(base);
+            return new Response(true, HttpStatus.OK).get();
+        }
+
+        return new Response(true, HttpStatus.BAD_REQUEST).get();
     }
 }
