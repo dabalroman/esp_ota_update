@@ -17,8 +17,18 @@ public class Device {
 
     private LocalDateTime lastSoftwareUpdate;
 
+    private static final int STATUS_NEW = 0;
+    private static final int STATUS_UP_TO_DATE = 1;
+    private static final int STATUS_NEEDS_UPDATE = 2;
+    private static final int STATUS_NO_SOFTWARE = 3;
+
     public Device(int id) {
         this.id = id;
+
+        //These are defaults values that would be overwritten on db get
+        this.status = STATUS_NEW;
+        this.lastSoftwareCheck = LocalDateTime.now();
+        this.lastSoftwareUpdate = LocalDateTime.now();
     }
 
     public Device() {

@@ -23,7 +23,10 @@ public class Software {
 
     public Software(int id) {
         this.id = id;
+
+        //These are defaults values that would be overwritten on db get
         this.createdAt = LocalDateTime.now();
+        this.version = "0.0";
     }
 
     /**
