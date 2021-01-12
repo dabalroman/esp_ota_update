@@ -35,20 +35,20 @@ public class Software {
             return false;
         }
 
-        if (update.getDeviceId() != null && !update.getDeviceId().equals(this.deviceId)) {
+        if (update.getDeviceId() != null) {
             this.deviceId = update.getDeviceId();
         }
 
-        if (update.getFile() != null && !update.getFile().equals(this.file)) {
+        if (update.getFile() != null) {
             this.file = update.getFile();
             this.md5 = this.calculateFileHash(this.file);
         }
 
-        if (update.getVersion() != null && !update.getVersion().equals(this.version)) {
+        if (update.getVersion() != null) {
             this.version = update.getVersion();
         }
 
-        if (update.getPreviousVersionId() != null && !update.getPreviousVersionId().equals(this.previousVersionId)) {
+        if (update.getPreviousVersionId() != null) {
             this.previousVersionId = update.getPreviousVersionId();
         }
 
