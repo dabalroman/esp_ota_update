@@ -14,5 +14,5 @@ public interface DeviceDao {
 
     int deleteDeviceById(int id);
 
-    int updateDeviceById(int id, Device device);
+    int updateDeviceById(Device device);
 }

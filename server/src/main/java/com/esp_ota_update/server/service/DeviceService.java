@@ -34,11 +34,7 @@ public class DeviceService {
         deviceDao.deleteDeviceById(id);
     }
 
-    public void updateDevice(int id, Device device) {
-        deviceDao.updateDeviceById(id, device);
-    }
-
     public void updateDevice(Device device) {
-        deviceDao.updateDeviceById(device.getId(), device);
+        deviceDao.updateDeviceById(device);
     }
 }

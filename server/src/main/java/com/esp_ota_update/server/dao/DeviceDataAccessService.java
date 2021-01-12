@@ -60,7 +60,7 @@ public class DeviceDataAccessService implements DeviceDao {
     }
 
     @Override
-    public int updateDeviceById(int id, Device device) {
+    public int updateDeviceById(Device device) {
         final String sql = "UPDATE device SET name = ?, mac = ?, software_name_scheme = ?, status = ?, "
                 + "last_software_check = ?, last_software_update = ? WHERE ID = ?";
 
@@ -72,7 +72,7 @@ public class DeviceDataAccessService implements DeviceDao {
                 device.getStatus(),
                 device.getLastSoftwareCheck(),
                 device.getLastSoftwareUpdate(),
-                id
+                device.getId()
         );
     }
 }
