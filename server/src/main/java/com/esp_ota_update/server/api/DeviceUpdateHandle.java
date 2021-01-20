@@ -36,14 +36,14 @@ public class DeviceUpdateHandle {
     @GetMapping
     public ResponseEntity<Response> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
         if(!this.verifyHeaders(headers)){
-            return new Response(false, HttpStatus.BAD_REQUEST).get();
+            return new Response(false, HttpStatus.BAD_REQUEST).getResponseEntity();
         }
 
 //        List<Software> data = softwareService.getSoftwareById(id);
 //        HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
 
 //        return new Response(data.toArray(), true, httpStatus).get();
-        return new Response(true, HttpStatus.I_AM_A_TEAPOT).get();
+        return new Response(true, HttpStatus.I_AM_A_TEAPOT).getResponseEntity();
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {

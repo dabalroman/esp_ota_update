@@ -26,7 +26,7 @@ public class SoftwareController {
     public ResponseEntity<Response> addSoftware(@Valid @NonNull @RequestBody Software software) {
         softwareService.addSoftware(software);
 
-        return new Response(true, HttpStatus.OK).get();
+        return new Response(true, HttpStatus.OK).getResponseEntity();
     }
 
     @GetMapping
@@ -34,7 +34,7 @@ public class SoftwareController {
         List<Software> data = softwareService.getAllSoftware();
         HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
 
-        return new Response(data.toArray(), true, httpStatus).get();
+        return new Response(data.toArray(), true, httpStatus).getResponseEntity();
     }
 
     @GetMapping(path = "{id}")
@@ -42,14 +42,14 @@ public class SoftwareController {
         List<Software> data = softwareService.getSoftwareById(id);
         HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
 
-        return new Response(data.toArray(), true, httpStatus).get();
+        return new Response(data.toArray(), true, httpStatus).getResponseEntity();
     }
 
     @DeleteMapping(path = "{id}")
     public ResponseEntity<Response> deleteSoftwareById(@PathVariable("id") int id) {
         softwareService.deleteSoftware(id);
 
-        return new Response(true, HttpStatus.OK).get();
+        return new Response(true, HttpStatus.OK).getResponseEntity();
     }
 
     @PutMapping(path = "{id}")
@@ -61,9 +61,9 @@ public class SoftwareController {
 
         if(base.applyUpdate(update)) {
             softwareService.updateSoftware(base);
-            return new Response(true, HttpStatus.OK).get();
+            return new Response(true, HttpStatus.OK).getResponseEntity();
         }
 
-        return new Response(false, HttpStatus.BAD_REQUEST).get();
+        return new Response(false, HttpStatus.BAD_REQUEST).getResponseEntity();
     }
 }

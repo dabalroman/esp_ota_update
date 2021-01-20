@@ -19,7 +19,7 @@ public class Response {
         this.status = status.value();
     }
 
-    public ResponseEntity<Response> get(){
+    public ResponseEntity<Response> getResponseEntity(){
         return ResponseEntity
                 .status(this.status)
                 .body(this);
