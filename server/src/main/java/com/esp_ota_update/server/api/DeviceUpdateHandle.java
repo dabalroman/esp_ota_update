@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "BooleanMethodIsAlwaysInverted"})
 @RequestMapping("api/v1/up/")
 @RestController
 public class DeviceUpdateHandle {
@@ -66,32 +67,22 @@ public class DeviceUpdateHandle {
         if (!headers.get(HEADER_USER_AGENT).equals("ESP8266-http-Update"))
             return false;
 
-        if (this.isNotValidMAC(headers.get(HEADER_AP_MAC)) || this.isNotValidMAC(headers.get(HEADER_STA_MAC)))
+        if (!this.isValidMAC(headers.get(HEADER_AP_MAC)) || !this.isValidMAC(headers.get(HEADER_STA_MAC)))
+            return false;
+
+        if (!this.isValidVersion(HEADER_SDK_VERSION) || !this.isValidVersion(HEADER_SOFTWARE_VERSION))
             return false;
 
         return headers.get(HEADER_MODE).equals("sketch");
     }
 
-    private boolean isNotValidMAC(String s) {
-        if (s.length() != 17) {
-            return true;
-        }
-
-        for (int i = 0; i < 17; i++) {
-            int current = s.charAt(i);
-            if ((i + 1) % 3 == 0) {
-                if (current != ':') {
-                    return true;
-                }
-            } else {
-                if (!(current >= '0' && current <= '9' || current >= 'A' && current <= 'F')) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    private boolean isValidMAC(String s) {
+        Pattern MAC = Pattern.compile("^(?:[A-F0-9]{2}:){5}[A-F0-9]{2}$");
+        return MAC.matcher(s).matches();
     }
 
-
+    private boolean isValidVersion(String s){
+        Pattern MAC = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
+        return MAC.matcher(s).matches();
+    }
 }
