@@ -1,8 +1,10 @@
 package com.esp_ota_update.server.api;
 
 import com.esp_ota_update.server.model.Device;
+import com.esp_ota_update.server.model.Software;
 import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
+import com.esp_ota_update.server.service.SoftwareService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +19,11 @@ import java.util.regex.Pattern;
 @SuppressWarnings({"FieldCanBeLocal", "BooleanMethodIsAlwaysInverted"})
 @RequestMapping("api/v1/up/")
 @RestController
-public class DeviceUpdateHandle {
+public class DeviceUpdateHandler {
 
     private final DeviceUpdateService deviceUpdateService;
     private final DeviceService deviceService;
+    private final SoftwareService softwareService;
 
     private final String HEADER_USER_AGENT = "user-agent";
     private final String HEADER_DEVICE_MAC = "x-esp8266-sta-mac";
@@ -33,9 +36,14 @@ public class DeviceUpdateHandle {
     private final String HEADER_SOFTWARE_VERSION = "x-esp8266-version";
     private final String HEADER_MODE = "x-esp8266-mode";
 
-    public DeviceUpdateHandle(DeviceUpdateService deviceUpdateService, DeviceService deviceService) {
+    public DeviceUpdateHandler(
+            DeviceUpdateService deviceUpdateService,
+            DeviceService deviceService,
+            SoftwareService softwareService
+    ) {
         this.deviceUpdateService = deviceUpdateService;
         this.deviceService = deviceService;
+        this.softwareService = softwareService;
     }
 
     @GetMapping
@@ -55,11 +63,13 @@ public class DeviceUpdateHandle {
             return new Response(true, HttpStatus.CREATED).responseEntity();
         }
 
+        Device device = devices.get(0);
+        List<Software> softwareForDevice = softwareService.getSoftwareByDeviceId(device.getId());
 
-//        List<Software> data = softwareService.getSoftwareById(id);
-//        HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        if (softwareForDevice.isEmpty()) {
+            return new Response("No software", false, HttpStatus.NOT_FOUND).responseEntity();
+        }
 
-//        return new Response(data.toArray(), true, httpStatus).get();
         return new Response(true, HttpStatus.I_AM_A_TEAPOT).responseEntity();
     }
 

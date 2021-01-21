@@ -30,6 +30,10 @@ public class SoftwareService {
         return softwareDao.selectSoftwareById(id);
     }
 
+    public List<Software> getSoftwareByDeviceId(int deviceId){
+        return softwareDao.selectSoftwareByDeviceId(deviceId);
+    }
+
     public void deleteSoftware(int id) {
         softwareDao.deleteSoftwareById(id);
     }
