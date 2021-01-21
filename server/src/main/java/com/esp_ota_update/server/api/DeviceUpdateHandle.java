@@ -82,8 +82,10 @@ public class DeviceUpdateHandle {
         if (!this.isValidMAC(headers.get(HEADER_AP_MAC)) || !this.isValidMAC(headers.get(HEADER_STA_MAC)))
             return false;
 
-        if (!this.isValidVersion(HEADER_SDK_VERSION) || !this.isValidVersion(HEADER_SOFTWARE_VERSION))
+        if (!this.isValidVersion(headers.get(HEADER_SDK_VERSION))
+                || !this.isValidVersion(headers.get(HEADER_SOFTWARE_VERSION))) {
             return false;
+        }
 
         return headers.get(HEADER_MODE).equals("sketch");
     }
@@ -93,7 +95,7 @@ public class DeviceUpdateHandle {
         return MAC.matcher(s).matches();
     }
 
-    private boolean isValidVersion(String s){
+    private boolean isValidVersion(String s) {
         Pattern version = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
         return version.matcher(s).matches();
     }
