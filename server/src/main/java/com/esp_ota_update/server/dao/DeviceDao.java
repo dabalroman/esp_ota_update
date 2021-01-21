@@ -12,6 +12,8 @@ public interface DeviceDao {
 
     List<Device> selectDeviceById(int id);
 
+    List<Device> selectDeviceByMac(String mac);
+
     int deleteDeviceById(int id);
 
     int updateDeviceById(Device device);

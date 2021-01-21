@@ -1,5 +1,7 @@
 package com.esp_ota_update.server.api;
 
+import com.esp_ota_update.server.model.Device;
+import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -17,6 +20,7 @@ import java.util.regex.Pattern;
 public class DeviceUpdateHandle {
 
     private final DeviceUpdateService deviceUpdateService;
+    private final DeviceService deviceService;
 
     private final String HEADER_USER_AGENT = "user-agent";
     private final String HEADER_STA_MAC = "x-esp8266-sta-mac";
@@ -29,21 +33,29 @@ public class DeviceUpdateHandle {
     private final String HEADER_SOFTWARE_VERSION = "x-esp8266-version";
     private final String HEADER_MODE = "x-esp8266-mode";
 
-    public DeviceUpdateHandle(DeviceUpdateService deviceUpdateService) {
+    public DeviceUpdateHandle(DeviceUpdateService deviceUpdateService, DeviceService deviceService) {
         this.deviceUpdateService = deviceUpdateService;
+        this.deviceService = deviceService;
     }
 
     @GetMapping
     public ResponseEntity<Response> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
         if(!this.verifyHeaders(headers)){
-            return new Response(false, HttpStatus.BAD_REQUEST).getResponseEntity();
+            System.out.println("ERR");
+            return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
+        }
+
+        List<Device> device = deviceService.getDeviceByMac(headers.get(HEADER_STA_MAC));
+
+        if(device.isEmpty()){
+            return new Response(false, HttpStatus.NOT_FOUND).responseEntity();
         }
 
 //        List<Software> data = softwareService.getSoftwareById(id);
 //        HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
 
 //        return new Response(data.toArray(), true, httpStatus).get();
-        return new Response(true, HttpStatus.I_AM_A_TEAPOT).getResponseEntity();
+        return new Response(true, HttpStatus.I_AM_A_TEAPOT).responseEntity();
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
@@ -82,7 +94,7 @@ public class DeviceUpdateHandle {
     }
 
     private boolean isValidVersion(String s){
-        Pattern MAC = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
-        return MAC.matcher(s).matches();
+        Pattern version = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
+        return version.matcher(s).matches();
     }
 }

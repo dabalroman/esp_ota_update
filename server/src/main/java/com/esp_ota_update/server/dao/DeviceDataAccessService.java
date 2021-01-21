@@ -53,6 +53,14 @@ public class DeviceDataAccessService implements DeviceDao {
     }
 
     @Override
+    public List<Device> selectDeviceByMac(String mac){
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_software_check, "
+                + "last_software_update FROM device WHERE mac = ?";
+
+        return jdbcTemplate.query(sql, new DeviceMapper(), mac);
+    }
+
+    @Override
     public int deleteDeviceById(int id) {
         final String sql = "DELETE FROM device WHERE id = ?";
 
