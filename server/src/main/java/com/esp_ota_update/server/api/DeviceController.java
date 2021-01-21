@@ -26,7 +26,7 @@ public class DeviceController {
     public ResponseEntity<Response> addDevice(@Valid @NonNull @RequestBody Device device) {
         deviceService.addDevice(device);
 
-        return new Response(true, HttpStatus.OK).getResponseEntity();
+        return new Response(true, HttpStatus.OK).responseEntity();
     }
 
     @GetMapping
@@ -34,7 +34,7 @@ public class DeviceController {
         List<Device> data = deviceService.getAllDevices();
         HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
 
-        return new Response(data.toArray(), true, httpStatus).getResponseEntity();
+        return new Response(data.toArray(), true, httpStatus).responseEntity();
     }
 
     @GetMapping(path = "{id}")
@@ -42,14 +42,14 @@ public class DeviceController {
         List<Device> data = deviceService.getDeviceById(id);
         HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
 
-        return new Response(data.toArray(), true, httpStatus).getResponseEntity();
+        return new Response(data.toArray(), true, httpStatus).responseEntity();
     }
 
     @DeleteMapping(path = "{id}")
     public ResponseEntity<Response> deleteDeviceById(@PathVariable("id") int id) {
         deviceService.deleteDevice(id);
 
-        return new Response(true, HttpStatus.OK).getResponseEntity();
+        return new Response(true, HttpStatus.OK).responseEntity();
     }
 
     @PutMapping(path = "{id}")
@@ -61,9 +61,9 @@ public class DeviceController {
 
         if (base.applyUpdate(update)) {
             deviceService.updateDevice(base);
-            return new Response(true, HttpStatus.OK).getResponseEntity();
+            return new Response(true, HttpStatus.OK).responseEntity();
         }
 
-        return new Response(true, HttpStatus.BAD_REQUEST).getResponseEntity();
+        return new Response(true, HttpStatus.BAD_REQUEST).responseEntity();
     }
 }
