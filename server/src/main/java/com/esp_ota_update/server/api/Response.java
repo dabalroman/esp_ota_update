@@ -14,6 +14,12 @@ public class Response {
         this.status = status.value();
     }
 
+    Response(String message, boolean success, HttpStatus status){
+        this.success = success;
+        this.data = new String[]{message};
+        this.status = status.value();
+    }
+
     Response(boolean success, HttpStatus status){
         this.success = success;
         this.status = status.value();
