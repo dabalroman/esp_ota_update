@@ -23,7 +23,7 @@ public class DeviceUpdateHandle {
     private final DeviceService deviceService;
 
     private final String HEADER_USER_AGENT = "user-agent";
-    private final String HEADER_STA_MAC = "x-esp8266-sta-mac";
+    private final String HEADER_DEVICE_MAC = "x-esp8266-sta-mac";
     private final String HEADER_AP_MAC = "x-esp8266-ap-mac";
     private final String HEADER_FREE_SPACE = "x-esp8266-free-space";
     private final String HEADER_SKETCH_SIZE = "x-esp8266-sketch-size";
@@ -40,16 +40,21 @@ public class DeviceUpdateHandle {
 
     @GetMapping
     public ResponseEntity<Response> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
-        if(!this.verifyHeaders(headers)){
-            System.out.println("ERR");
+        if (!this.verifyHeaders(headers)) {
             return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
         }
 
-        List<Device> device = deviceService.getDeviceByMac(headers.get(HEADER_STA_MAC));
+        List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
 
-        if(device.isEmpty()){
-            return new Response(false, HttpStatus.NOT_FOUND).responseEntity();
+        if (devices.isEmpty()) {
+            Device device = new Device();
+            device.setMac(headers.get(HEADER_DEVICE_MAC));
+
+            deviceService.addDevice(device);
+
+            return new Response(true, HttpStatus.CREATED).responseEntity();
         }
+
 
 //        List<Software> data = softwareService.getSoftwareById(id);
 //        HttpStatus httpStatus = !data.isEmpty() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
@@ -59,12 +64,12 @@ public class DeviceUpdateHandle {
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
-        for(Map.Entry<String, String> entry : headers.entrySet()){
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
         if (headers.get(HEADER_USER_AGENT) == null
-                || headers.get(HEADER_STA_MAC) == null
+                || headers.get(HEADER_DEVICE_MAC) == null
                 || headers.get(HEADER_AP_MAC) == null
                 || headers.get(HEADER_FREE_SPACE) == null
                 || headers.get(HEADER_SKETCH_SIZE) == null
@@ -79,8 +84,9 @@ public class DeviceUpdateHandle {
         if (!headers.get(HEADER_USER_AGENT).equals("ESP8266-http-Update"))
             return false;
 
-        if (!this.isValidMAC(headers.get(HEADER_AP_MAC)) || !this.isValidMAC(headers.get(HEADER_STA_MAC)))
+        if (!this.isValidMAC(headers.get(HEADER_AP_MAC)) || !this.isValidMAC(headers.get(HEADER_DEVICE_MAC))) {
             return false;
+        }
 
         if (!this.isValidVersion(headers.get(HEADER_SDK_VERSION))
                 || !this.isValidVersion(headers.get(HEADER_SOFTWARE_VERSION))) {
