@@ -52,17 +52,6 @@ public class DeviceUpdateHandler {
             return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
         }
 
-        List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
-
-        if (devices.isEmpty()) {
-            Device device = new Device();
-            device.setMac(headers.get(HEADER_DEVICE_MAC));
-
-            deviceService.addDevice(device);
-
-            return new Response(true, HttpStatus.CREATED).responseEntity();
-        }
-
         Device device = devices.get(0);
         List<Software> softwareForDevice = softwareService.getSoftwareByDeviceId(device.getId());
 
@@ -112,7 +101,7 @@ public class DeviceUpdateHandler {
     }
 
     private boolean isValidVersion(String s) {
-        Pattern version = Pattern.compile("^\\d+\\.\\d+\\.\\d+$");
+        Pattern version = Pattern.compile("^[A-z_-]*\\d+\\.\\d+(?:\\.\\d+)?$");
         return version.matcher(s).matches();
     }
 }
