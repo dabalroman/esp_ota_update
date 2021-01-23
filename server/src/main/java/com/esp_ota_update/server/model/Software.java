@@ -3,17 +3,18 @@ package com.esp_ota_update.server.model;
 import com.esp_ota_update.server.util.MD5Checksum;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Software {
+    public static final String VERSION_REGEX = "^([A-z_-]*)(\\d+\\.\\d+(?:\\.\\d+)?)$";
     private final Integer id;
-
     private Integer deviceId;
     private Integer previousVersionId;
-
     private String version;
     private String file;
     private String md5;
-
     private LocalDateTime createdAt;
 
     //JSON constructor
@@ -26,7 +27,61 @@ public class Software {
 
         //These are defaults values that would be overwritten on db get
         this.createdAt = LocalDateTime.now();
-        this.version = "0.0";
+        this.version = "0.0.0";
+    }
+
+
+    /**
+     * @param a Version string A
+     * @param b Version string B
+     * @return 1 on A > B, 0 on A = B, -1 on A < B
+     * @throws Exception when version string is incorrectly formatted or provided different scheme names
+     */
+    public static int compareVersions(String a, String b) throws Exception {
+        Pattern version = Pattern.compile(Software.VERSION_REGEX);
+        Matcher mA = version.matcher(a);
+        Matcher mB = version.matcher(b);
+
+        if (!mA.find() || !mB.find()) {
+            throw new Exception("WRONG VERSION SCHEME");
+        }
+
+        if (!mA.group(1).equals(mB.group(1))) {
+            throw new Exception("DIFFERENT VERSION NAME");
+        }
+
+        String[] partsA = mA.group(2).split("\\.");
+        String[] partsB = mB.group(2).split("\\.");
+
+        int[] numA = Arrays.stream(partsA).mapToInt(Integer::parseInt).toArray();
+        int[] numB = Arrays.stream(partsB).mapToInt(Integer::parseInt).toArray();
+
+        //Compare each number one by one
+        if (numA[0] <= numB[0]) {
+            if (numA[0] == numB[0] && numA.length > 1 && numB.length > 1) {
+                if (numA[1] <= numB[1]) {
+                    if (numA[1] == numB[1] && numA.length > 2 && numB.length > 2) {
+                        if (numA[2] <= numB[2]) {
+                            if (numA[2] == numB[2]) {
+                                return 0;
+                            } else {
+                                return -1;
+                            }
+                        } else {
+                            return 1;
+                        }
+                    } else {
+                        return -1;
+                    }
+                } else {
+                    return 1;
+                }
+            } else {
+                return -1;
+            }
+        } else {
+            return 1;
+        }
     }
 
     /**
