@@ -52,6 +52,17 @@ public class DeviceUpdateHandler {
             return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
         }
 
+        List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
+
+        if (devices.isEmpty()) {
+            Device device = new Device();
+            device.setMac(headers.get(HEADER_DEVICE_MAC));
+
+            deviceService.addDevice(device);
+
+            return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+        }
+
         Device device = devices.get(0);
         List<Software> softwareForDevice = softwareService.getSoftwareByDeviceId(device.getId());
 
