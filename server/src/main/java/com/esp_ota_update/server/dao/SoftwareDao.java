@@ -13,6 +13,8 @@ public interface SoftwareDao {
 
     List<Software> selectSoftwareByDeviceId(int deviceId);
 
+    List<Software> selectLatestSoftwareByDeviceId(int deviceId);
+
     int deleteSoftwareById(int id);
 
     int updateSoftware(Software software);

@@ -60,6 +60,14 @@ public class SoftwareDataAccessService implements SoftwareDao {
     }
 
     @Override
+    public List<Software> selectLatestSoftwareByDeviceId(int deviceId) {
+        final String sql = "SELECT id, version, file, md5, created_at, device_id, previous_version_id"
+                + " FROM software WHERE device_id = ? LIMIT 1";
+
+        return jdbcTemplate.query(sql, new SoftwareMapper(), deviceId);
+    }
+
+    @Override
     public int deleteSoftwareById(int id) {
         final String sql = "DELETE FROM software WHERE id = ?";
 

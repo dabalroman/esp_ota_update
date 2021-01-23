@@ -34,6 +34,10 @@ public class SoftwareService {
         return softwareDao.selectSoftwareByDeviceId(deviceId);
     }
 
+    public List<Software> getLatestSoftwareByDeviceId(int deviceId){
+        return softwareDao.selectLatestSoftwareByDeviceId(deviceId);
+    }
+
     public void deleteSoftware(int id) {
         softwareDao.deleteSoftwareById(id);
     }
