@@ -2,6 +2,7 @@ package com.esp_ota_update.server.api;
 
 import com.esp_ota_update.server.model.Device;
 import com.esp_ota_update.server.model.Software;
+import com.esp_ota_update.server.model.Update;
 import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
@@ -55,6 +56,7 @@ public class DeviceUpdateHandler {
         List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
 
         if (devices.isEmpty()) {
+            //Self-introduce path
             Device device = new Device();
             device.setMac(headers.get(HEADER_DEVICE_MAC));
 
@@ -64,11 +66,41 @@ public class DeviceUpdateHandler {
         }
 
         Device device = devices.get(0);
-        List<Software> softwareForDevice = softwareService.getSoftwareByDeviceId(device.getId());
+        Update latestUpdate;
+        Software latestSoftware;
 
-        if (softwareForDevice.isEmpty()) {
-            return new Response("No software", false, HttpStatus.NOT_FOUND).responseEntity();
+        List<Update> latestDeviceUpdateList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
+
+        if(latestDeviceUpdateList.isEmpty()){
+            //First update?
+            //TODO
+
+//            List<Software> softwareForDevice = softwareService.getLatestSoftwareByDeviceId(device.getId());
+            return new Response(false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
         }
+
+        latestUpdate = latestDeviceUpdateList.get(0);
+        List<Software> latestDeviceSoftwareList = softwareService.getSoftwareById(latestUpdate.getSoftware_to());
+
+        if(latestDeviceSoftwareList.isEmpty()){
+            //Error: Updated to unknown software
+
+            return new Response(false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
+        }
+
+        latestSoftware = latestDeviceSoftwareList.get(0);
+
+        updateDeviceVersionData(device, latestSoftware, latestUpdate, headers);
+
+
+//        if (softwareForDevice.isEmpty()) {
+//            //No software found path
+//            return new Response("No software", false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
+//        }
+
+
+
+
 
         return new Response(true, HttpStatus.I_AM_A_TEAPOT).responseEntity();
     }
@@ -112,7 +144,11 @@ public class DeviceUpdateHandler {
     }
 
     private boolean isValidVersion(String s) {
-        Pattern version = Pattern.compile("^[A-z_-]*\\d+\\.\\d+(?:\\.\\d+)?$");
+        Pattern version = Pattern.compile(Software.VERSION_REGEX);
         return version.matcher(s).matches();
+    }
+
+    private void updateDeviceVersionData(Device device, Software latestSoftware, Update latestUpdate, Map<String, String> headers){
+
     }
 }
