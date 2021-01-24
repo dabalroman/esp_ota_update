@@ -17,10 +17,10 @@ public class Device {
 
     private LocalDateTime lastSoftwareUpdate;
 
-    private static final int STATUS_NEW = 0;
-    private static final int STATUS_UP_TO_DATE = 1;
-    private static final int STATUS_NEEDS_UPDATE = 2;
-    private static final int STATUS_NO_SOFTWARE = 3;
+    public static final int STATUS_NEW = 0;
+    public static final int STATUS_UP_TO_DATE = 1;
+    public static final int STATUS_NEEDS_UPDATE = 2;
+    public static final int STATUS_NO_SOFTWARE = 3;
 
     public Device(int id) {
         this.id = id;
@@ -115,11 +115,19 @@ public class Device {
         this.lastSoftwareCheck = lastSoftwareCheck;
     }
 
+    public void setLastSoftwareCheck() {
+        this.lastSoftwareCheck = LocalDateTime.now();
+    }
+
     public LocalDateTime getLastSoftwareUpdate() {
         return lastSoftwareUpdate;
     }
 
     public void setLastSoftwareUpdate(LocalDateTime lastSoftwareUpdate) {
         this.lastSoftwareUpdate = lastSoftwareUpdate;
+    }
+
+    public void setLastSoftwareUpdate() {
+        this.lastSoftwareUpdate = LocalDateTime.now();
     }
 }
