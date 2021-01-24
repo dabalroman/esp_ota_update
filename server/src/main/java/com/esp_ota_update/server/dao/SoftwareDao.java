@@ -11,7 +11,7 @@ public interface SoftwareDao {
 
     List<Software> selectSoftwareById(int id);
 
-    List<Software> selectSoftwareByDeviceId(int deviceId);
+    List<Software> selectSoftwareByDeviceIdAndVersion(int deviceId, String version);
 
     List<Software> selectLatestSoftwareByDeviceId(int deviceId);
 
