@@ -11,10 +11,8 @@ public class UpdateMapper implements RowMapper<Update> {
     public Update mapRow(ResultSet rs, int rowNum) throws SQLException {
         Update update = new Update(rs.getInt("id"));
 
+        update.setStatus(rs.getInt("status"));
         update.setTimestamp(rs.getTimestamp("timestamp").toLocalDateTime());
-        if (rs.wasNull()) {
-            update.setTimestamp(null);
-        }
 
         update.setSoftware_to(rs.getInt("software_to"));
         if (rs.wasNull()) {

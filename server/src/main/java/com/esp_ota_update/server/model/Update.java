@@ -5,14 +5,22 @@ import java.time.LocalDateTime;
 public class Update {
     private final Integer id;
 
+    private Integer status;
     private Integer deviceId;
     private Integer software_to;
     private Integer software_from;
 
     private LocalDateTime timestamp;
 
+    public static final Integer STATUS_PENDING = 0;
+    public static final Integer STATUS_OK = 1;
+    public static final Integer STATUS_ERROR = 2;
+
     public Update(){
         this(0);
+
+        this.timestamp = LocalDateTime.now();
+        this.status = STATUS_PENDING;
     }
 
     public Update(Integer id) {
@@ -73,5 +81,13 @@ public class Update {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

@@ -18,6 +18,14 @@ public class DeviceUpdateService {
         this.updateDao = updateDao;
     }
 
+    public void addDeviceUpdate(Update update) {
+        updateDao.insertDeviceUpdate(update);
+    }
+
+    public void updateDeviceUpdate(Update update) {
+        updateDao.updateDeviceUpdate(update);
+    }
+
     public List<Update> getLatestDeviceUpdate(int deviceId) {
         return updateDao.selectLatestDeviceUpdateById(deviceId);
     }

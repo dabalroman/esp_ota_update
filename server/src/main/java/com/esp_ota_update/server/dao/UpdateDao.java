@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface UpdateDao {
     List<Update> selectLatestDeviceUpdateById(int deviceId);
+
+    int insertDeviceUpdate(Update update);
+
+    int updateDeviceUpdate(Update update);
 }
