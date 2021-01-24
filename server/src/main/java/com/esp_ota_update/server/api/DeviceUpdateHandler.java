@@ -53,54 +53,50 @@ public class DeviceUpdateHandler {
             return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
         }
 
-        List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
+        try {
 
-        if (devices.isEmpty()) {
-            //Self-introduce path
-            Device device = new Device();
-            device.setMac(headers.get(HEADER_DEVICE_MAC));
+            List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
 
-            deviceService.addDevice(device);
+            if (devices.isEmpty()) {
+                //Self-introduce path
+                Device device = new Device();
+                device.setMac(headers.get(HEADER_DEVICE_MAC));
+                deviceService.addDevice(device);
 
-            return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+                return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+            }
+
+            //Known device path
+            Device device = devices.get(0);
+            Update latestUpdate;
+            Software latestSoftware;
+
+            List<Update> latestDeviceUpdateList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
+
+            if (latestDeviceUpdateList.isEmpty()) {
+                //First update?
+                return new Response(false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
+            }
+
+            latestUpdate = latestDeviceUpdateList.get(0);
+            List<Software> latestDeviceSoftwareList = softwareService.getSoftwareById(latestUpdate.getSoftware_to());
+            latestSoftware = latestDeviceSoftwareList.get(0);
+
+            if ((int) latestUpdate.getStatus() == Update.STATUS_PENDING) {
+                //Check if device updated successfully
+                if (Software.compareVersions(headers.get(HEADER_SOFTWARE_VERSION), latestSoftware.getVersion()) == 0) {
+                    latestUpdate.setStatus(Update.STATUS_OK);
+                } else {
+                    latestUpdate.setStatus(Update.STATUS_ERROR);
+                }
+
+                deviceUpdateService.updateDeviceUpdate(latestUpdate);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        Device device = devices.get(0);
-        Update latestUpdate;
-        Software latestSoftware;
-
-        List<Update> latestDeviceUpdateList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
-
-        if(latestDeviceUpdateList.isEmpty()){
-            //First update?
-            //TODO
-
-//            List<Software> softwareForDevice = softwareService.getLatestSoftwareByDeviceId(device.getId());
-            return new Response(false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
-        }
-
-        latestUpdate = latestDeviceUpdateList.get(0);
-        List<Software> latestDeviceSoftwareList = softwareService.getSoftwareById(latestUpdate.getSoftware_to());
-
-        if(latestDeviceSoftwareList.isEmpty()){
-            //Error: Updated to unknown software
-
-            return new Response(false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
-        }
-
-        latestSoftware = latestDeviceSoftwareList.get(0);
-
-        updateDeviceVersionData(device, latestSoftware, latestUpdate, headers);
-
-
-//        if (softwareForDevice.isEmpty()) {
-//            //No software found path
-//            return new Response("No software", false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
-//        }
-
-
-
-
 
         return new Response(true, HttpStatus.I_AM_A_TEAPOT).responseEntity();
     }
