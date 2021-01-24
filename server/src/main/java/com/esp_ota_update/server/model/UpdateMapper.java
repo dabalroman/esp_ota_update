@@ -26,7 +26,7 @@ public class UpdateMapper implements RowMapper<Update> {
 
         update.setSoftware_from(rs.getInt("software_from"));
         if (rs.wasNull()) {
-            update.setSoftware_to(null);
+            update.setSoftware_from(null);
         }
 
         return update;
