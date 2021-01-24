@@ -88,6 +88,7 @@ public class Update {
     }
 
     public void setStatus(Integer status) {
+        this.timestamp = LocalDateTime.now();
         this.status = status;
     }
 }
