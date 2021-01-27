@@ -6,12 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Software {
     public static final String VERSION_REGEX = "^([A-z_-]*)(\\d+\\.\\d+(?:\\.\\d+)?)$";
-    public static final String SOFTWARE_DIRECTORY_PATH = "C://localhost/espota/";
+    public static final String SOFTWARE_DIRECTORY_PATH = "C:\\localhost\\espota\\";
 
     private final Integer id;
     private Integer deviceId;
@@ -42,20 +41,16 @@ public class Software {
      * @throws Exception when version string is incorrectly formatted or provided different scheme names
      */
     public static int compareVersions(String a, String b) throws Exception {
-        Pattern version = Pattern.compile(Software.VERSION_REGEX);
-        Matcher mA = version.matcher(a);
-        Matcher mB = version.matcher(b);
-
-        if (!mA.find() || !mB.find()) {
+        if (!isValidVersionName(a) || !isValidVersionName(b)) {
             throw new Exception("WRONG VERSION SCHEME");
         }
 
-        if (!mA.group(1).equals(mB.group(1))) {
+        if (!extractNameFromNameString(a).equals(extractNameFromNameString(b))) {
             throw new Exception("DIFFERENT VERSION NAME");
         }
 
-        String[] partsA = mA.group(2).split("\\.");
-        String[] partsB = mB.group(2).split("\\.");
+        String[] partsA = extractVersionFromNameString(a).split("\\.");
+        String[] partsB = extractVersionFromNameString(b).split("\\.");
 
         int[] numA = Arrays.stream(partsA).mapToInt(Integer::parseInt).toArray();
         int[] numB = Arrays.stream(partsB).mapToInt(Integer::parseInt).toArray();
@@ -86,6 +81,23 @@ public class Software {
         } else {
             return 1;
         }
+    }
+
+    public static String extractVersionFromNameString(String nameString) {
+        return Pattern.compile(Software.VERSION_REGEX).matcher(nameString).group(2);
+    }
+
+    public static String extractNameFromNameString(String nameString) {
+        return Pattern.compile(Software.VERSION_REGEX).matcher(nameString).group(1);
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean isValidVersionName(String name) {
+        return Pattern.compile(Software.VERSION_REGEX).matcher(name).matches();
+    }
+
+    public static String getSoftwarePath(String file) {
+        return SOFTWARE_DIRECTORY_PATH + file;
     }
 
     /**
@@ -125,12 +137,8 @@ public class Software {
         }
     }
 
-    public String getSoftwarePath(){
+    public String getSoftwarePath() {
         return getSoftwarePath(this.file);
-    }
-
-    public static String getSoftwarePath(String file){
-        return SOFTWARE_DIRECTORY_PATH + file;
     }
 
     public byte[] getBinaries() {

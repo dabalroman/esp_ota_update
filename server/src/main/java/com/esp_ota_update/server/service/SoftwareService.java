@@ -30,11 +30,11 @@ public class SoftwareService {
         return softwareDao.selectSoftwareById(id);
     }
 
-    public List<Software> getSoftwareByDeviceIdAndVersion(int deviceId, String version){
+    public List<Software> getSoftwareByDeviceIdAndVersion(int deviceId, String version) {
         return softwareDao.selectSoftwareByDeviceIdAndVersion(deviceId, version);
     }
 
-    public List<Software> getLatestSoftwareByDeviceId(int deviceId){
+    public List<Software> getLatestSoftwareByDeviceId(int deviceId) {
         return softwareDao.selectLatestSoftwareByDeviceId(deviceId);
     }
 
