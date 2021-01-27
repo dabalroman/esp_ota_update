@@ -2,6 +2,8 @@ package com.esp_ota_update.server.model;
 
 import com.esp_ota_update.server.util.MD5Checksum;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -121,6 +123,16 @@ public class Software {
         }
     }
 
+    public byte[] getBinaries() {
+        try {
+            return Files.readAllBytes(Path.of(file));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public Integer getDeviceId() {
         return this.deviceId;
     }
@@ -151,6 +163,7 @@ public class Software {
 
     public void setFile(String file) {
         this.file = file;
+        this.md5 = calculateFileHash(file);
     }
 
     public String getMd5() {
