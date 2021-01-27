@@ -6,6 +6,7 @@ import com.esp_ota_update.server.model.Update;
 import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
+import com.esp_ota_update.server.util.MD5Checksum;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,10 +57,7 @@ public class DeviceUpdateHandler {
         headers.set("Content-Type", "application/octet-stream");
         headers.set("Content-Disposition", "attachment; filename=image.png");
 
-        Software software = softwareService.getSoftwareById(1).get(0);
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(software.getBinaries());
+        return ResponseEntity.ok().body(null);
     }
 
     @GetMapping
@@ -120,7 +118,7 @@ public class DeviceUpdateHandler {
                 }
             }
 
-            List<Software> softwareAsList = softwareService.getLatestSoftwareByDeviceId(device.getId());
+            List<Software> softwareAsList = softwareService.getSoftwareByDeviceId(device.getId());
             boolean softwareNotFound = softwareAsList.isEmpty();
             if (softwareNotFound) {
                 device.setLastSoftwareCheck();
@@ -150,6 +148,77 @@ public class DeviceUpdateHandler {
         }
 
         return new Response(true, HttpStatus.I_AM_A_TEAPOT).responseEntity();
+    }
+
+    private void scanSoftwareFolder() {
+        System.out.println("File scanner started.");
+        File[] files = new File(Software.SOFTWARE_DIRECTORY_PATH).listFiles();
+
+        if (files == null) {
+            return;
+        }
+
+        for (File file : files) {
+            processSoftwareFile(file);
+        }
+    }
+
+    private void processSoftwareFile(File softwareFile) {
+        System.out.print("    " + softwareFile.getName() + " - ");
+
+        String softwareName = softwareFile.getName().substring(0, softwareFile.getName().length() - 4);
+        if (!Software.isValidVersionName(softwareName)) {
+            System.out.println("ERR: Invalid file name.");
+            return;
+        }
+
+        String softwareNameScheme = Software.extractNameFromNameString(softwareName) + "#.#.#";
+        List<Device> deviceList = deviceService.getDeviceBySoftwareName(softwareNameScheme);
+
+        if (deviceList.isEmpty()) {
+            System.out.println("ERR: No matching device found.");
+            return;
+        }
+
+        Device device = deviceList.get(0);
+        List<Software> matchingSoftwareList = softwareService.getSoftwareByDeviceId(device.getId());
+        if (matchingSoftwareList.isEmpty()) {
+            //No software for this device found
+            Software newSoftware = new Software();
+            newSoftware.setDeviceId(device.getId());
+            newSoftware.setVersion(softwareName);
+            newSoftware.setFile(softwareFile.getName());
+            softwareService.addSoftware(newSoftware);
+
+            device.setStatus(Device.STATUS_NEEDS_UPDATE);
+            deviceService.updateDevice(device);
+
+            System.out.println("OK: Created software record for new device.");
+            return;
+        }
+
+        try {
+            for (Software s : matchingSoftwareList) {
+                if (s.getVersion().equals(softwareName)) {
+                    if (s.getMd5().equals(MD5Checksum.get(softwareFile.getAbsolutePath()))) {
+                        System.out.println("OK. Found previous software record.");
+                    } else {
+                        System.out.println("ERR. Found previous software with different hash!");
+                    }
+                    return;
+                }
+
+                if (Software.compareVersions(s.getVersion(), softwareName) == 1) {
+                    System.out.println("ERR. Found record of higher version of this software.");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("ERR. Database error.");
+            return;
+        }
+
+        System.out.println("OK.");
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
