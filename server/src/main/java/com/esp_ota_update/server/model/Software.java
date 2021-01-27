@@ -6,10 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Software {
-    public static final String VERSION_REGEX = "^([A-z_-]*)(\\d+\\.\\d+(?:\\.\\d+)?)$";
+    public static final String VERSION_REGEX = "^([A-z_-]*)(\\d+\\.\\d+\\.\\d+)$";
     public static final String SOFTWARE_DIRECTORY_PATH = "C:\\localhost\\espota\\";
 
     private final Integer id;
@@ -83,12 +84,18 @@ public class Software {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static String extractVersionFromNameString(String nameString) {
-        return Pattern.compile(Software.VERSION_REGEX).matcher(nameString).group(2);
+        Matcher m = Pattern.compile(Software.VERSION_REGEX).matcher(nameString);
+        m.matches();
+        return m.group(2);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static String extractNameFromNameString(String nameString) {
-        return Pattern.compile(Software.VERSION_REGEX).matcher(nameString).group(1);
+        Matcher m = Pattern.compile(Software.VERSION_REGEX).matcher(nameString);
+        m.matches();
+        return m.group(1);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -115,7 +122,7 @@ public class Software {
 
         if (update.getFile() != null) {
             this.file = update.getFile();
-            this.md5 = this.calculateFileHash(this.file);
+            this.md5 = this.calculateFileHash(getSoftwarePath(this.file));
         }
 
         if (update.getVersion() != null) {
@@ -181,7 +188,7 @@ public class Software {
 
     public void setFile(String file) {
         this.file = file;
-        this.md5 = calculateFileHash(file);
+        this.md5 = calculateFileHash(getSoftwarePath(file));
     }
 
     public String getMd5() {
