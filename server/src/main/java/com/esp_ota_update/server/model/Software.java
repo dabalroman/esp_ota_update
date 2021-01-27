@@ -56,32 +56,14 @@ public class Software {
         int[] numA = Arrays.stream(partsA).mapToInt(Integer::parseInt).toArray();
         int[] numB = Arrays.stream(partsB).mapToInt(Integer::parseInt).toArray();
 
-        //Compare each number one by one
-        if (numA[0] <= numB[0]) {
-            if (numA[0] == numB[0] && numA.length > 1 && numB.length > 1) {
-                if (numA[1] <= numB[1]) {
-                    if (numA[1] == numB[1] && numA.length > 2 && numB.length > 2) {
-                        if (numA[2] <= numB[2]) {
-                            if (numA[2] == numB[2]) {
-                                return 0;
-                            } else {
-                                return -1;
-                            }
-                        } else {
-                            return 1;
-                        }
-                    } else {
-                        return -1;
-                    }
-                } else {
-                    return 1;
-                }
-            } else {
-                return -1;
-            }
-        } else {
-            return 1;
+        long valA = (long) (numA[0] * 1e12 + numA[1] * 1e6 + numA[2]);
+        long valB = (long) (numB[0] * 1e12 + numB[1] * 1e6 + numB[2]);
+
+        if (valA == valB) {
+            return 0;
         }
+
+        return valA > valB ? 1 : -1;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
