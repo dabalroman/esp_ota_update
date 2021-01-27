@@ -13,7 +13,7 @@ public interface SoftwareDao {
 
     List<Software> selectSoftwareByDeviceIdAndVersion(int deviceId, String version);
 
-    List<Software> selectLatestSoftwareByDeviceId(int deviceId);
+    List<Software> selectSoftwareByDeviceId(int deviceId);
 
     int deleteSoftwareById(int id);
 
