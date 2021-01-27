@@ -30,6 +30,10 @@ public class DeviceService {
         return deviceDao.selectDeviceById(id);
     }
 
+    public List<Device> getDeviceBySoftwareName(String softwareName) {
+        return deviceDao.selectDeviceBySoftwareName(softwareName);
+    }
+
     public List<Device> getDeviceByMac(String mac) { return deviceDao.selectDeviceByMac(mac); }
 
     public void deleteDevice(int id) {
