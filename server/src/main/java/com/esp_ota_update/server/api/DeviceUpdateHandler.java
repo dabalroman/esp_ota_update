@@ -6,6 +6,7 @@ import com.esp_ota_update.server.model.Update;
 import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -66,47 +68,83 @@ public class DeviceUpdateHandler {
             return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
         }
 
+        System.out.println("Update request from " + headers.get(HEADER_DEVICE_MAC) + ", version "
+                + headers.get(HEADER_SOFTWARE_VERSION));
+
         try {
 
-            List<Device> devices = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
+            List<Device> deviceAsList = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
+            boolean unknownDevice = deviceAsList.isEmpty();
 
-            if (devices.isEmpty()) {
+            if (unknownDevice) {
                 //Self-introduce path
                 Device device = new Device();
                 device.setMac(headers.get(HEADER_DEVICE_MAC));
                 deviceService.addDevice(device);
 
+                System.out.println("Update request: Introduced new device " + headers.get(HEADER_DEVICE_MAC));
                 return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
             //Known device path
-            Device device = devices.get(0);
-            Update latestUpdate;
-            Software latestSoftware;
+            Device device = deviceAsList.get(0);
+            Update update;
+            Software software;
 
-            List<Update> latestDeviceUpdateList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
+            List<Update> deviceUpdateAsList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
+            boolean firstUpdate = deviceUpdateAsList.isEmpty();
 
-            if (latestDeviceUpdateList.isEmpty()) {
-                //First update?
-                return new Response(false, HttpStatus.INTERNAL_SERVER_ERROR).responseEntity();
-            }
+            if (!firstUpdate) {
+                Update lastUpdate = deviceUpdateAsList.get(0);
+                List<Software> softwareAsList = softwareService.getSoftwareById(lastUpdate.getSoftware_to());
+                Software lastSoftware = softwareAsList.get(0);
 
-            latestUpdate = latestDeviceUpdateList.get(0);
-            List<Software> latestDeviceSoftwareList = softwareService.getSoftwareById(latestUpdate.getSoftware_to());
-            latestSoftware = latestDeviceSoftwareList.get(0);
+                //Update last update status
+                if ((int) lastUpdate.getStatus() == Update.STATUS_PENDING) {
+                    //Check if device updated successfully
+                    if (Software.compareVersions(
+                            headers.get(HEADER_SOFTWARE_VERSION), lastSoftware.getVersion()) == 0) {
+                        lastUpdate.setStatus(Update.STATUS_OK);
+                        device.setLastSoftwareUpdate();
 
-            if ((int) latestUpdate.getStatus() == Update.STATUS_PENDING) {
-                //Check if device updated successfully
-                if (Software.compareVersions(headers.get(HEADER_SOFTWARE_VERSION), latestSoftware.getVersion()) == 0) {
-                    latestUpdate.setStatus(Update.STATUS_OK);
-                } else {
-                    latestUpdate.setStatus(Update.STATUS_ERROR);
+                        System.out.println("Update request: Successful update of " + device.getName()
+                                + " to " + lastSoftware.getVersion());
+                    } else {
+                        lastUpdate.setStatus(Update.STATUS_ERROR);
+
+                        System.out.println("Update request: Unsuccessful update of " + device.getName()
+                                + " to " + lastSoftware.getVersion());
+                    }
+
+                    deviceUpdateService.updateDeviceUpdate(lastUpdate);
                 }
+            }
 
-                deviceUpdateService.updateDeviceUpdate(latestUpdate);
+            List<Software> softwareAsList = softwareService.getLatestSoftwareByDeviceId(device.getId());
+            boolean softwareNotFound = softwareAsList.isEmpty();
+            if (softwareNotFound) {
+                device.setLastSoftwareCheck();
+                deviceService.updateDevice(device);
+
+                System.out.println("Update request: No software found for " + device.getName());
+                return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+            }
+
+            software = softwareAsList.get(0);
+            if (Software.compareVersions(software.getVersion(), headers.get(HEADER_SOFTWARE_VERSION)) != 1) {
+                //No update for device
+                device.setLastSoftwareCheck();
+                deviceService.updateDevice(device);
+
+                System.out.println("Update request: No update found for " + device.getName()
+                        + " (" + software.getVersion() + " <= "  + headers.get(HEADER_SOFTWARE_VERSION) + ")");
+                return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
 
+            device.setLastSoftwareCheck();
+            deviceService.updateDevice(device);
+//            deviceUpdateService.updateDeviceUpdate(update);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -155,9 +193,5 @@ public class DeviceUpdateHandler {
     private boolean isValidVersion(String s) {
         Pattern version = Pattern.compile(Software.VERSION_REGEX);
         return version.matcher(s).matches();
-    }
-
-    private void updateDeviceVersionData(Device device, Software latestSoftware, Update latestUpdate, Map<String, String> headers){
-
     }
 }
