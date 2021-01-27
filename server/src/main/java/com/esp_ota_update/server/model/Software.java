@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 
 public class Software {
     public static final String VERSION_REGEX = "^([A-z_-]*)(\\d+\\.\\d+(?:\\.\\d+)?)$";
+    public static final String SOFTWARE_DIRECTORY_PATH = "C://localhost/espota/";
+
     private final Integer id;
     private Integer deviceId;
     private Integer previousVersionId;
@@ -123,9 +125,17 @@ public class Software {
         }
     }
 
+    public String getSoftwarePath(){
+        return getSoftwarePath(this.file);
+    }
+
+    public static String getSoftwarePath(String file){
+        return SOFTWARE_DIRECTORY_PATH + file;
+    }
+
     public byte[] getBinaries() {
         try {
-            return Files.readAllBytes(Path.of(file));
+            return Files.readAllBytes(Path.of(this.getSoftwarePath()));
         } catch (Exception e) {
             e.printStackTrace();
         }
