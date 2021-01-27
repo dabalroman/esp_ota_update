@@ -6,7 +6,6 @@ import com.esp_ota_update.server.model.Update;
 import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -82,7 +82,7 @@ public class DeviceUpdateHandler {
                 device.setMac(headers.get(HEADER_DEVICE_MAC));
                 deviceService.addDevice(device);
 
-                System.out.println("Update request: Introduced new device " + headers.get(HEADER_DEVICE_MAC));
+                System.out.println("    Introduced new device " + headers.get(HEADER_DEVICE_MAC));
                 return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
@@ -107,12 +107,12 @@ public class DeviceUpdateHandler {
                         lastUpdate.setStatus(Update.STATUS_OK);
                         device.setLastSoftwareUpdate();
 
-                        System.out.println("Update request: Successful update of " + device.getName()
+                        System.out.println("    Successful update of " + device.getName()
                                 + " to " + lastSoftware.getVersion());
                     } else {
                         lastUpdate.setStatus(Update.STATUS_ERROR);
 
-                        System.out.println("Update request: Unsuccessful update of " + device.getName()
+                        System.out.println("    Unsuccessful update of " + device.getName()
                                 + " to " + lastSoftware.getVersion());
                     }
 
@@ -126,7 +126,7 @@ public class DeviceUpdateHandler {
                 device.setLastSoftwareCheck();
                 deviceService.updateDevice(device);
 
-                System.out.println("Update request: No software found for " + device.getName());
+                System.out.println("    No software found for " + device.getName());
                 return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
@@ -136,8 +136,8 @@ public class DeviceUpdateHandler {
                 device.setLastSoftwareCheck();
                 deviceService.updateDevice(device);
 
-                System.out.println("Update request: No update found for " + device.getName()
-                        + " (" + software.getVersion() + " <= "  + headers.get(HEADER_SOFTWARE_VERSION) + ")");
+                System.out.println("    No update found for " + device.getName()
+                        + " (" + software.getVersion() + " <= " + headers.get(HEADER_SOFTWARE_VERSION) + ")");
                 return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
@@ -177,8 +177,8 @@ public class DeviceUpdateHandler {
             return false;
         }
 
-        if (!this.isValidVersion(headers.get(HEADER_SDK_VERSION))
-                || !this.isValidVersion(headers.get(HEADER_SOFTWARE_VERSION))) {
+        if (!Software.isValidVersionName(headers.get(HEADER_SDK_VERSION))
+                || !Software.isValidVersionName(headers.get(HEADER_SOFTWARE_VERSION))) {
             return false;
         }
 
@@ -188,10 +188,5 @@ public class DeviceUpdateHandler {
     private boolean isValidMAC(String s) {
         Pattern MAC = Pattern.compile("^(?:[A-F0-9]{2}:){5}[A-F0-9]{2}$");
         return MAC.matcher(s).matches();
-    }
-
-    private boolean isValidVersion(String s) {
-        Pattern version = Pattern.compile(Software.VERSION_REGEX);
-        return version.matcher(s).matches();
     }
 }
