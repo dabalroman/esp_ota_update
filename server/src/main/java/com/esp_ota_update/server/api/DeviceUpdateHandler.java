@@ -139,9 +139,10 @@ public class DeviceUpdateHandler {
             Update newUpdate = new Update();
             Software latestAvailableSoftware = softwareAsList.get(0);
 
-            if (!firstUpdate) {
+            updateAsList = deviceUpdateService.getLatestSuccessfulDeviceUpdate(device.getId());
+
+            if (!firstUpdate && !updateAsList.isEmpty()) {
                 //Check if update is available
-                updateAsList = deviceUpdateService.getLatestSuccessfulDeviceUpdate(device.getId());
                 Update latestSuccessfulUpdate = updateAsList.get(0);
                 if (Software.compareVersions(
                         latestAvailableSoftware.getVersion(), headers.get(HEADER_SOFTWARE_VERSION)) != 1) {
@@ -208,7 +209,9 @@ public class DeviceUpdateHandler {
             return;
         }
 
-        String softwareNameScheme = Software.extractNameFromNameString(softwareName) + "#.#.#";
+        String softwareNameScheme = Software.createSoftwareNameSchemeFromSoftwareName(
+                Software.extractNameFromNameString(softwareName)
+        );
         List<Device> deviceList = deviceService.getDeviceBySoftwareName(softwareNameScheme);
 
         if (deviceList.isEmpty()) {
@@ -312,8 +315,7 @@ public class DeviceUpdateHandler {
             return false;
         }
 
-        if (!Software.isValidVersionName(headers.get(HEADER_SDK_VERSION))
-                || !Software.isValidVersionName(headers.get(HEADER_SOFTWARE_VERSION))) {
+        if (!Software.isValidVersionName(headers.get(HEADER_SOFTWARE_VERSION))) {
             return false;
         }
 
