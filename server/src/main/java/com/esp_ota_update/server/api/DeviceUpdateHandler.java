@@ -50,22 +50,6 @@ public class DeviceUpdateHandler {
         this.softwareService = softwareService;
     }
 
-//    @GetMapping(path = "/img")
-//    public ResponseEntity<byte[]> imageTest(HttpServletResponse response) {
-//        scanSoftwareFolder();
-////        HttpHeaders headers = new HttpHeaders();
-////        headers.set("Content-Description", "File transfer");
-////        headers.set("Content-Type", "application/octet-stream");
-////        headers.set("Content-Disposition", "attachment; filename=image.png");
-////
-////        Software software = softwareService.getSoftwareById(1).get(0);
-////        return ResponseEntity.ok()
-////                .headers(headers)
-////                .body(software.getBinaries());
-//
-//        return ResponseEntity.ok().body(null);
-//    }
-
     @GetMapping
     public ResponseEntity<byte[]> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
         if (!this.verifyHeaders(headers)) {
