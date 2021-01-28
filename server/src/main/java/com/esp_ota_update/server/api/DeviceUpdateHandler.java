@@ -68,7 +68,8 @@ public class DeviceUpdateHandler {
     @GetMapping
     public ResponseEntity<Response> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
         if (!this.verifyHeaders(headers)) {
-            return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
+            System.out.println("\nUpdate request denied - wrong headers.");
+            return new Response(false, HttpStatus.FORBIDDEN).responseEntity();
         }
 
         scanSoftwareFolder();
