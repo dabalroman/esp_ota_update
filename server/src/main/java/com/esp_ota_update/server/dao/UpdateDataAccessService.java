@@ -54,7 +54,7 @@ public class UpdateDataAccessService implements UpdateDao {
     @Override
     public List<Update> selectLatestDeviceUpdateById(int deviceId) {
         final String sql = "SELECT id, timestamp, device_id, software_from, software_to, status"
-                + " FROM `update` WHERE device_id = ? LIMIT 1";
+                + " FROM `update` WHERE device_id = ? ORDER BY id DESC LIMIT 1";
 
         return jdbcTemplate.query(sql, new UpdateMapper(), deviceId);
     }

@@ -62,7 +62,7 @@ public class SoftwareDataAccessService implements SoftwareDao {
     @Override
     public List<Software> selectSoftwareByDeviceId(int deviceId) {
         final String sql = "SELECT id, version, file, md5, created_at, device_id, previous_version_id"
-                + " FROM software WHERE device_id = ? ORDER BY id";
+                + " FROM software WHERE device_id = ? ORDER BY id DESC";
 
         return jdbcTemplate.query(sql, new SoftwareMapper(), deviceId);
     }
