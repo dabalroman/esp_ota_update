@@ -7,6 +7,7 @@ import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
 import com.esp_ota_update.server.util.MD5Checksum;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,10 +67,10 @@ public class DeviceUpdateHandler {
 //    }
 
     @GetMapping
-    public ResponseEntity<Response> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
+    public ResponseEntity<byte[]> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
         if (!this.verifyHeaders(headers)) {
             System.out.println("\nUpdate request denied - wrong headers.");
-            return new Response(false, HttpStatus.FORBIDDEN).responseEntity();
+            return new BinaryResponse(HttpStatus.FORBIDDEN).responseEntity();
         }
 
         scanSoftwareFolder();
@@ -85,10 +86,11 @@ public class DeviceUpdateHandler {
                 //Self-introduce path
                 Device device = new Device();
                 device.setMac(headers.get(HEADER_DEVICE_MAC));
+                device.setName(Software.extractNameFromNameString(headers.get(HEADER_SOFTWARE_VERSION)));
                 deviceService.addDevice(device);
 
-                System.out.println("    OK. Introduced new device " + headers.get(HEADER_DEVICE_MAC));
-                return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+                System.out.println("    OK. Introduced new device " + device.getName());
+                return new BinaryResponse(HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
             //Known device path
@@ -131,7 +133,7 @@ public class DeviceUpdateHandler {
                 deviceService.updateDevice(device);
 
                 System.out.println("    WARNING: No software found.");
-                return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+                return new BinaryResponse(HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
             Update newUpdate = new Update();
@@ -150,7 +152,7 @@ public class DeviceUpdateHandler {
 
                     System.out.println("    OK. No update found (" + latestAvailableSoftware.getVersion()
                             + " <= " + headers.get(HEADER_SOFTWARE_VERSION) + ")");
-                    return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+                    return new BinaryResponse(HttpStatus.NOT_MODIFIED).responseEntity();
                 }
 
                 List<Software> currentlyInstalledSoftwareAsList =
@@ -169,13 +171,21 @@ public class DeviceUpdateHandler {
             device.setLastSoftwareCheck();
             deviceService.updateDevice(device);
 
+            byte[] binaries = latestAvailableSoftware.getBinaries();
+
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("Content-Type", "application/octet-stream; charset=utf8");
+            responseHeaders.set("Content-Disposition", "attachment; filename=update.bin");
+            responseHeaders.set("Content-Length", String.valueOf(binaries.length));
+            responseHeaders.set("x-MD5", latestAvailableSoftware.getMd5());
+
             System.out.println("    OK. Updating device to version " + latestAvailableSoftware.getVersion());
-            return new Response(true, HttpStatus.OK).responseEntity();
+            return new BinaryResponse(HttpStatus.OK, responseHeaders, binaries).responseEntity();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return new Response(true, HttpStatus.I_AM_A_TEAPOT).responseEntity();
+        return new BinaryResponse(HttpStatus.I_AM_A_TEAPOT).responseEntity();
     }
 
     private void scanSoftwareFolder() {
