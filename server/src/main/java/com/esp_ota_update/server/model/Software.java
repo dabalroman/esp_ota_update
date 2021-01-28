@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Software {
-    public static final String VERSION_REGEX = "^([A-z_-]*)(\\d+\\.\\d+\\.\\d+)$";
+    public static final String VERSION_REGEX = "^([A-z_]*)_(\\d+\\.\\d+\\.\\d+)$";
     public static final String SOFTWARE_DIRECTORY_PATH = "C:\\localhost\\espota\\";
 
     private final Integer id;
@@ -83,6 +83,10 @@ public class Software {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isValidVersionName(String name) {
         return Pattern.compile(Software.VERSION_REGEX).matcher(name).matches();
+    }
+
+    public static String createSoftwareNameSchemeFromSoftwareName(String name) {
+        return name + "_#.#.#";
     }
 
     public static String getSoftwarePath(String file) {
