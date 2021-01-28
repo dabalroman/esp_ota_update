@@ -26,8 +26,12 @@ public class DeviceUpdateService {
         updateDao.updateDeviceUpdate(update);
     }
 
+    public List<Update> getLatestSuccessfulDeviceUpdate(int deviceId) {
+        return updateDao.selectLatestDeviceUpdateById(deviceId, true);
+    }
+
     public List<Update> getLatestDeviceUpdate(int deviceId) {
-        return updateDao.selectLatestDeviceUpdateById(deviceId);
+        return updateDao.selectLatestDeviceUpdateById(deviceId, false);
     }
 
 }

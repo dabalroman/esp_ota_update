@@ -5,7 +5,7 @@ import com.esp_ota_update.server.model.Update;
 import java.util.List;
 
 public interface UpdateDao {
-    List<Update> selectLatestDeviceUpdateById(int deviceId);
+    List<Update> selectLatestDeviceUpdateById(int deviceId, boolean successful);
 
     int insertDeviceUpdate(Update update);
 
