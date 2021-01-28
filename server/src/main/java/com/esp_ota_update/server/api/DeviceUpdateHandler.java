@@ -7,9 +7,12 @@ import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
 import com.esp_ota_update.server.util.MD5Checksum;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +26,8 @@ import java.util.regex.Pattern;
 @SuppressWarnings({"FieldCanBeLocal", "BooleanMethodIsAlwaysInverted"})
 @RequestMapping("api/v1/up")
 @RestController
+@Configuration
+@EnableScheduling
 public class DeviceUpdateHandler {
 
     private final DeviceUpdateService deviceUpdateService;
@@ -173,7 +178,8 @@ public class DeviceUpdateHandler {
         return new BinaryResponse(HttpStatus.I_AM_A_TEAPOT).responseEntity();
     }
 
-    private void scanSoftwareFolder() {
+    @Scheduled(fixedDelay = 300000, initialDelay = 5000)
+    public void scanSoftwareFolder() {
         System.out.println("\nFile scanner started.");
         File[] files = new File(Software.SOFTWARE_DIRECTORY_PATH).listFiles();
 
