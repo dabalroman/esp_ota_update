@@ -6,15 +6,10 @@ public class Device {
     private final Integer id;
 
     private String name;
-
     private String mac;
-
     private String softwareNameScheme;
-
     private Integer status;
-
     private LocalDateTime lastSoftwareCheck;
-
     private LocalDateTime lastSoftwareUpdate;
 
     public static final int STATUS_NEW = 0;
@@ -83,7 +78,7 @@ public class Device {
         this.name = name;
 
         if (this.softwareNameScheme == null) {
-            this.softwareNameScheme = name + "_#.#.#";
+            this.softwareNameScheme = Software.createSoftwareNameSchemeFromSoftwareName(this.name);
         }
     }
 
