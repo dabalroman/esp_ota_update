@@ -14,14 +14,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"FieldCanBeLocal", "BooleanMethodIsAlwaysInverted"})
-@RequestMapping("api/v1/up/")
+@RequestMapping("api/v1/up")
 @RestController
 public class DeviceUpdateHandler {
 
@@ -50,15 +49,21 @@ public class DeviceUpdateHandler {
         this.softwareService = softwareService;
     }
 
-    @GetMapping(path = "/img")
-    public ResponseEntity<byte[]> imageTest(HttpServletResponse response){
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Description", "File transfer");
-        headers.set("Content-Type", "application/octet-stream");
-        headers.set("Content-Disposition", "attachment; filename=image.png");
-
-        return ResponseEntity.ok().body(null);
-    }
+//    @GetMapping(path = "/img")
+//    public ResponseEntity<byte[]> imageTest(HttpServletResponse response) {
+//        scanSoftwareFolder();
+////        HttpHeaders headers = new HttpHeaders();
+////        headers.set("Content-Description", "File transfer");
+////        headers.set("Content-Type", "application/octet-stream");
+////        headers.set("Content-Disposition", "attachment; filename=image.png");
+////
+////        Software software = softwareService.getSoftwareById(1).get(0);
+////        return ResponseEntity.ok()
+////                .headers(headers)
+////                .body(software.getBinaries());
+//
+//        return ResponseEntity.ok().body(null);
+//    }
 
     @GetMapping
     public ResponseEntity<Response> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
@@ -66,11 +71,12 @@ public class DeviceUpdateHandler {
             return new Response(false, HttpStatus.BAD_REQUEST).responseEntity();
         }
 
-        System.out.println("Update request from " + headers.get(HEADER_DEVICE_MAC) + ", version "
+        scanSoftwareFolder();
+
+        System.out.println("\nUpdate request from " + headers.get(HEADER_DEVICE_MAC) + ", version "
                 + headers.get(HEADER_SOFTWARE_VERSION));
 
         try {
-
             List<Device> deviceAsList = deviceService.getDeviceByMac(headers.get(HEADER_DEVICE_MAC));
             boolean unknownDevice = deviceAsList.isEmpty();
 
@@ -80,68 +86,90 @@ public class DeviceUpdateHandler {
                 device.setMac(headers.get(HEADER_DEVICE_MAC));
                 deviceService.addDevice(device);
 
-                System.out.println("    Introduced new device " + headers.get(HEADER_DEVICE_MAC));
+                System.out.println("    OK. Introduced new device " + headers.get(HEADER_DEVICE_MAC));
                 return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
             //Known device path
             Device device = deviceAsList.get(0);
-            Software software;
+            System.out.println("    Device recognized as " + device.getName());
 
-            List<Update> deviceUpdateAsList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
-            boolean firstUpdate = deviceUpdateAsList.isEmpty();
+            List<Update> updateAsList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
+            boolean firstUpdate = updateAsList.isEmpty();
 
+            //Check if device was updated successfully
             if (!firstUpdate) {
-                Update lastUpdate = deviceUpdateAsList.get(0);
-                List<Software> softwareAsList = softwareService.getSoftwareById(lastUpdate.getSoftware_to());
-                Software lastSoftware = softwareAsList.get(0);
+                Update lastUpdate = updateAsList.get(0);
+                List<Software> lastSoftwareAsList = softwareService.getSoftwareById(lastUpdate.getSoftware_to());
+                Software lastSoftware = lastSoftwareAsList.get(0);
 
-                //Update last update status
                 if ((int) lastUpdate.getStatus() == Update.STATUS_PENDING) {
-                    //Check if device updated successfully
                     if (Software.compareVersions(
                             headers.get(HEADER_SOFTWARE_VERSION), lastSoftware.getVersion()) == 0) {
                         lastUpdate.setStatus(Update.STATUS_OK);
+                        device.setStatus(Device.STATUS_UP_TO_DATE);
                         device.setLastSoftwareUpdate();
 
-                        System.out.println("    Successful update of " + device.getName()
-                                + " to " + lastSoftware.getVersion());
+                        System.out.println("    INFO: Successful update to version " + lastSoftware.getVersion());
                     } else {
                         lastUpdate.setStatus(Update.STATUS_ERROR);
 
-                        System.out.println("    Unsuccessful update of " + device.getName()
-                                + " to " + lastSoftware.getVersion());
+                        System.out.println("    INFO: Unsuccessful update to version " + lastSoftware.getVersion());
                     }
 
                     deviceUpdateService.updateDeviceUpdate(lastUpdate);
                 }
             }
 
+            //Check if any software is available
             List<Software> softwareAsList = softwareService.getSoftwareByDeviceId(device.getId());
             boolean softwareNotFound = softwareAsList.isEmpty();
             if (softwareNotFound) {
                 device.setLastSoftwareCheck();
+                device.setStatus(Device.STATUS_NO_SOFTWARE);
                 deviceService.updateDevice(device);
 
-                System.out.println("    No software found for " + device.getName());
+                System.out.println("    WARNING: No software found.");
                 return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
-            software = softwareAsList.get(0);
-            if (Software.compareVersions(software.getVersion(), headers.get(HEADER_SOFTWARE_VERSION)) != 1) {
-                //No update for device
-                device.setLastSoftwareCheck();
-                deviceService.updateDevice(device);
+            Update newUpdate = new Update();
+            Software latestAvailableSoftware = softwareAsList.get(0);
 
-                System.out.println("    No update found for " + device.getName()
-                        + " (" + software.getVersion() + " <= " + headers.get(HEADER_SOFTWARE_VERSION) + ")");
-                return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+            if (!firstUpdate) {
+                //Check if update is available
+                updateAsList = deviceUpdateService.getLatestSuccessfulDeviceUpdate(device.getId());
+                Update latestSuccessfulUpdate = updateAsList.get(0);
+                if (Software.compareVersions(
+                        latestAvailableSoftware.getVersion(), headers.get(HEADER_SOFTWARE_VERSION)) != 1) {
+
+                    //No update for device
+                    device.setLastSoftwareCheck();
+                    deviceService.updateDevice(device);
+
+                    System.out.println("    OK. No update found (" + latestAvailableSoftware.getVersion()
+                            + " <= " + headers.get(HEADER_SOFTWARE_VERSION) + ")");
+                    return new Response(true, HttpStatus.NOT_MODIFIED).responseEntity();
+                }
+
+                List<Software> currentlyInstalledSoftwareAsList =
+                        softwareService.getSoftwareById(latestSuccessfulUpdate.getSoftware_to());
+                Software currentlyInstalledSoftware = currentlyInstalledSoftwareAsList.get(0);
+                newUpdate.setSoftware_from(currentlyInstalledSoftware.getId());
+            } else {
+                newUpdate.setSoftware_from(null);
             }
 
+            //Update device
+            newUpdate.setDeviceId(device.getId());
+            newUpdate.setSoftware_to(latestAvailableSoftware.getId());
+            deviceUpdateService.addDeviceUpdate(newUpdate);
 
             device.setLastSoftwareCheck();
             deviceService.updateDevice(device);
-//            deviceUpdateService.updateDeviceUpdate(update);
+
+            System.out.println("    OK. Updating device to version " + latestAvailableSoftware.getVersion());
+            return new Response(true, HttpStatus.OK).responseEntity();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -150,15 +178,13 @@ public class DeviceUpdateHandler {
     }
 
     private void scanSoftwareFolder() {
-        System.out.println("File scanner started.");
+        System.out.println("\nFile scanner started.");
         File[] files = new File(Software.SOFTWARE_DIRECTORY_PATH).listFiles();
 
-        if (files == null) {
-            return;
-        }
-
-        for (File file : files) {
-            processSoftwareFile(file);
+        if (files != null) {
+            for (File file : files) {
+                processSoftwareFile(file);
+            }
         }
     }
 
@@ -250,8 +276,9 @@ public class DeviceUpdateHandler {
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
+        System.out.println("\nRequest headers:");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
+            System.out.println("    " + entry.getKey() + ": " + entry.getValue());
         }
 
         if (headers.get(HEADER_USER_AGENT) == null

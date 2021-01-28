@@ -81,6 +81,10 @@ public class Device {
 
     public void setName(String name) {
         this.name = name;
+
+        if (this.softwareNameScheme == null) {
+            this.softwareNameScheme = name + "_#.#.#";
+        }
     }
 
     public String getMac() {
