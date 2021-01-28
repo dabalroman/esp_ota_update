@@ -8,6 +8,7 @@ public class Device {
     private String name;
     private String mac;
     private String softwareNameScheme;
+    private String version;
     private Integer status;
     private LocalDateTime lastSoftwareCheck;
     private LocalDateTime lastSoftwareUpdate;
@@ -128,5 +129,13 @@ public class Device {
 
     public void setLastSoftwareUpdate() {
         this.lastSoftwareUpdate = LocalDateTime.now();
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

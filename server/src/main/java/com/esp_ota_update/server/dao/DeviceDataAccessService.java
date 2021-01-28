@@ -22,8 +22,8 @@ public class DeviceDataAccessService implements DeviceDao {
     @Override
     public int insertDevice(Device device) {
         final String sql =
-                "INSERT INTO device (name, mac, software_name_scheme, status, last_software_check, "
-                        + "last_software_update) VALUES (?, ?, ?, ?, ?, ?)";
+                "INSERT INTO device (name, mac, software_name_scheme, status, version, last_software_check, "
+                        + "last_software_update) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         return jdbcTemplate.update(
                 sql,
@@ -31,6 +31,7 @@ public class DeviceDataAccessService implements DeviceDao {
                 device.getMac(),
                 device.getSoftwareNameScheme(),
                 device.getStatus(),
+                device.getVersion(),
                 device.getLastSoftwareCheck(),
                 device.getLastSoftwareUpdate()
         );
@@ -38,7 +39,7 @@ public class DeviceDataAccessService implements DeviceDao {
 
     @Override
     public List<Device> selectAllDevices() {
-        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_software_check, "
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, version, last_software_check, "
                 + "last_software_update FROM device";
 
         return jdbcTemplate.query(sql, new DeviceMapper());
@@ -46,7 +47,7 @@ public class DeviceDataAccessService implements DeviceDao {
 
     @Override
     public List<Device> selectDeviceById(int id) {
-        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_software_check, "
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, version, last_software_check, "
                 + "last_software_update FROM device WHERE id = ?";
 
         return jdbcTemplate.query(sql, new DeviceMapper(), id);
@@ -54,7 +55,7 @@ public class DeviceDataAccessService implements DeviceDao {
 
     @Override
     public List<Device> selectDeviceBySoftwareName(String softwareName) {
-        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_software_check, "
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, version, last_software_check, "
                 + "last_software_update FROM device WHERE software_name_scheme LIKE ?";
 
         return jdbcTemplate.query(sql, new DeviceMapper(), softwareName + "%");
@@ -62,7 +63,7 @@ public class DeviceDataAccessService implements DeviceDao {
 
     @Override
     public List<Device> selectDeviceByMac(String mac){
-        final String sql = "SELECT id, name, mac, software_name_scheme, status, last_software_check, "
+        final String sql = "SELECT id, name, mac, software_name_scheme, status, version, last_software_check, "
                 + "last_software_update FROM device WHERE mac = ?";
 
         return jdbcTemplate.query(sql, new DeviceMapper(), mac);
@@ -77,7 +78,7 @@ public class DeviceDataAccessService implements DeviceDao {
 
     @Override
     public int updateDeviceById(Device device) {
-        final String sql = "UPDATE device SET name = ?, mac = ?, software_name_scheme = ?, status = ?, "
+        final String sql = "UPDATE device SET name = ?, mac = ?, software_name_scheme = ?, status = ?, version = ?, "
                 + "last_software_check = ?, last_software_update = ? WHERE ID = ?";
 
         return jdbcTemplate.update(
@@ -86,6 +87,7 @@ public class DeviceDataAccessService implements DeviceDao {
                 device.getMac(),
                 device.getSoftwareNameScheme(),
                 device.getStatus(),
+                device.getVersion(),
                 device.getLastSoftwareCheck(),
                 device.getLastSoftwareUpdate(),
                 device.getId()

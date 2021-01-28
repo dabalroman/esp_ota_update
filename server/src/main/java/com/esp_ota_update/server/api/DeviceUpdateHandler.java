@@ -76,6 +76,7 @@ public class DeviceUpdateHandler {
                 Device device = new Device();
                 device.setMac(headers.get(HEADER_DEVICE_MAC));
                 device.setName(Software.extractNameFromNameString(headers.get(HEADER_SOFTWARE_VERSION)));
+                device.setVersion(Software.extractVersionFromNameString(headers.get(HEADER_SOFTWARE_VERSION)));
                 deviceService.addDevice(device);
 
                 System.out.println("    OK. Introduced new device " + device.getName());
@@ -100,6 +101,7 @@ public class DeviceUpdateHandler {
                             headers.get(HEADER_SOFTWARE_VERSION), lastSoftware.getVersion()) == 0) {
                         lastUpdate.setStatus(Update.STATUS_OK);
                         device.setStatus(Device.STATUS_UP_TO_DATE);
+                        device.setVersion(Software.extractVersionFromNameString(lastSoftware.getVersion()));
                         device.setLastSoftwareUpdate();
 
                         System.out.println("    INFO: Successful update to version " + lastSoftware.getVersion());

@@ -15,13 +15,18 @@ public class DeviceMapper implements RowMapper<Device> {
         device.setLastSoftwareCheck(rs.getTimestamp("last_software_check").toLocalDateTime());
         device.setLastSoftwareUpdate(rs.getTimestamp("last_software_update").toLocalDateTime());
 
+        device.setVersion(rs.getString("version"));
+        if (rs.wasNull()) {
+            device.setVersion(null);
+        }
+
         device.setMac(rs.getString("mac"));
-        if(rs.wasNull()){
+        if (rs.wasNull()) {
             device.setMac(null);
         }
 
         device.setSoftwareNameScheme(rs.getString("software_name_scheme"));
-        if(rs.wasNull()){
+        if (rs.wasNull()) {
             device.setSoftwareNameScheme(null);
         }
 
