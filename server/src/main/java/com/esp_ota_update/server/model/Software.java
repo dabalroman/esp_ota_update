@@ -1,6 +1,7 @@
 package com.esp_ota_update.server.model;
 
 import com.esp_ota_update.server.util.MD5Checksum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -134,6 +135,7 @@ public class Software {
         return getSoftwarePath(this.file);
     }
 
+    @JsonIgnore
     public byte[] getBinaries() {
         try {
             return Files.readAllBytes(Path.of(this.getSoftwarePath()));
