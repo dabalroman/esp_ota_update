@@ -86,7 +86,6 @@ public class DeviceUpdateHandler {
 
             //Known device path
             Device device = deviceAsList.get(0);
-            Update update;
             Software software;
 
             List<Update> deviceUpdateAsList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
@@ -180,45 +179,74 @@ public class DeviceUpdateHandler {
             return;
         }
 
+        int highestSoftwareVersionId = 0;
+        String highestSoftwareVersionName = "";
+        boolean sameHash = false;
+
         Device device = deviceList.get(0);
         List<Software> matchingSoftwareList = softwareService.getSoftwareByDeviceId(device.getId());
-        if (matchingSoftwareList.isEmpty()) {
-            //No software for this device found
-            Software newSoftware = new Software();
-            newSoftware.setDeviceId(device.getId());
-            newSoftware.setVersion(softwareName);
-            newSoftware.setFile(softwareFile.getName());
-            softwareService.addSoftware(newSoftware);
+        if (!matchingSoftwareList.isEmpty()) {
+            try {
+                for (Software s : matchingSoftwareList) {
+                    int versionCompareResult = Software.compareVersions(s.getVersion(), softwareName);
+                    sameHash = s.getMd5().equals(MD5Checksum.get(softwareFile.getAbsolutePath()));
 
-            device.setStatus(Device.STATUS_NEEDS_UPDATE);
-            deviceService.updateDevice(device);
+                    if (versionCompareResult == 0) {
+                        //Found previous version
+                        if (sameHash) {
+                            System.out.println("OK. Found previous record of this software version.");
 
-            System.out.println("OK: Created software record for new device.");
-            return;
-        }
-
-        try {
-            for (Software s : matchingSoftwareList) {
-                if (s.getVersion().equals(softwareName)) {
-                    if (s.getMd5().equals(MD5Checksum.get(softwareFile.getAbsolutePath()))) {
-                        System.out.println("OK. Found previous software record.");
-                    } else {
-                        System.out.println("ERR. Found previous software with different hash!");
+                            if (device.getLastSoftwareUpdate().isBefore(s.getCreatedAt())) {
+                                device.setStatus(Device.STATUS_NEEDS_UPDATE);
+                                deviceService.updateDevice(device);
+                            }
+                        } else {
+                            System.out.println("ERR: Found previous software with different hash!");
+                        }
+                        return;
                     }
-                    return;
-                }
 
-                if (Software.compareVersions(s.getVersion(), softwareName) == 1) {
-                    System.out.println("ERR. Found record of higher version of this software.");
-                    return;
+                    if (versionCompareResult == 1) {
+                        //Found higher version
+                        System.out.println(
+                                "ERR: Found record of higher version (" + s.getVersion() + ") of this software."
+                        );
+                        return;
+                    }
+
+                    //Keep track of highest software version
+                    if (highestSoftwareVersionName.equals("")
+                            || Software.compareVersions(s.getVersion(), highestSoftwareVersionName) == 1) {
+                        highestSoftwareVersionId = s.getId();
+                        highestSoftwareVersionName = s.getVersion();
+                    }
                 }
+            } catch (Exception e) {
+                System.out.println("ERR: Database error.");
+                return;
             }
-        } catch (Exception e) {
-            System.out.println("ERR. Database error.");
-            return;
         }
 
-        System.out.println("OK.");
+        if (sameHash) {
+            System.out.print("WARNING: Software with same hash already exists in database; ");
+        }
+
+        //New version or no software for device found
+        Software newSoftware = new Software();
+        newSoftware.setDeviceId(device.getId());
+        newSoftware.setVersion(softwareName);
+        newSoftware.setFile(softwareFile.getName());
+
+        if (!highestSoftwareVersionName.equals("")) {
+            newSoftware.setPreviousVersionId(highestSoftwareVersionId);
+        }
+
+        softwareService.addSoftware(newSoftware);
+
+        device.setStatus(Device.STATUS_NEEDS_UPDATE);
+        deviceService.updateDevice(device);
+
+        System.out.println("OK. Created new software record.");
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
