@@ -28,6 +28,7 @@ public class Response {
     public ResponseEntity<Response> responseEntity(){
         return ResponseEntity
                 .status(this.status)
+                .header("Access-Control-Allow-Origin", "*")
                 .body(this);
     }
 }
