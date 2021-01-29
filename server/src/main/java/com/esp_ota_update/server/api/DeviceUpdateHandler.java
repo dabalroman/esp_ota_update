@@ -161,6 +161,7 @@ public class DeviceUpdateHandler {
             deviceUpdateService.addDeviceUpdate(newUpdate);
 
             device.setLastSoftwareCheck();
+            device.setStatus(Device.STATUS_UPDATE_IN_PROGRESS);
             deviceService.updateDevice(device);
 
             byte[] binaries = latestAvailableSoftware.getBinaries();

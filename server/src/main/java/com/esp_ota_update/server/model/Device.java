@@ -17,6 +17,7 @@ public class Device {
     public static final int STATUS_UP_TO_DATE = 1;
     public static final int STATUS_NEEDS_UPDATE = 2;
     public static final int STATUS_NO_SOFTWARE = 3;
+    public static final int STATUS_UPDATE_IN_PROGRESS = 4;
 
     public Device(int id) {
         this.id = id;
