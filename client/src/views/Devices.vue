@@ -33,7 +33,7 @@ export default {
 
   data () {
     return {
-      devices: []
+      devices: [new Device], //To declare Device[] type
     };
   },
 
@@ -48,7 +48,7 @@ export default {
           .then(response => {
             let data = response.data;
 
-            data = data.map(d => new Device(
+            this.devices = data.map(d => new Device(
                 d['id'],
                 d['name'],
                 d['mac'],
@@ -58,10 +58,6 @@ export default {
                 d['lastSoftwareCheck'],
                 d['lastSoftwareUpdate']
             ));
-
-            console.log(data);
-
-            this.devices = data;
           });
     }
   }
