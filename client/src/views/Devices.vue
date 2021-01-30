@@ -1,6 +1,25 @@
 <template>
   <div class="devices">
-    <b-table striped hover :items="items" :fields="fields"></b-table>
+    <table class="table table-striped table-hover table-dark table-borderless">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Device</th>
+        <th class="text-center">Status</th>
+        <th class="text-center">Software version</th>
+        <th class="text-right">Last update check</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="(device, key) in devices" :key="device.id">
+        <td>{{ key + 1 }}</td>
+        <td>{{ device.name }}</td>
+        <td :class="[device.statusClass, 'text-center']">{{ device.status }}</td>
+        <td class="text-center">{{ device.softwareVersion }}</td>
+        <td class="text-right">{{ device.lastSoftwareCheck }}</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -14,8 +33,7 @@ export default {
 
   data () {
     return {
-      items: [],
-      fields: ['id', 'device_name', 'macAddress', 'status', 'softwareVersion', 'lastSoftwareUpdateCheck']
+      devices: []
     };
   },
 
@@ -30,25 +48,20 @@ export default {
           .then(response => {
             let data = response.data;
 
+            data = data.map(d => new Device(
+                d['id'],
+                d['name'],
+                d['mac'],
+                d['softwareNameScheme'],
+                d['version'],
+                d['status'],
+                d['lastSoftwareCheck'],
+                d['lastSoftwareUpdate']
+            ));
+
             console.log(data);
 
-            for (let i = 0; i < data.length; i++) {
-              let d = new Date(data[i]['lastSoftwareCheck']);
-              console.log(d.toLocaleDateString());
-              let dateString = d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds() + ' ' +
-                  d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear();
-
-              data[i] = {
-                id: i + 1,
-                device_name: data[i]['name'],
-                macAddress: data[i]['mac'],
-                status: Device.mapStatusToString(data[i]['status']),
-                softwareVersion: data[i]['version'] ?? '-',
-                lastSoftwareUpdateCheck: dateString
-              };
-            }
-
-            this.items = data;
+            this.devices = data;
           });
     }
   }

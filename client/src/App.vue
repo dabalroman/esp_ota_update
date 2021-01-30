@@ -17,13 +17,20 @@ export default {
 };
 </script>
 
-<style>
-#app {
+<style lang="scss">
+@import "./style/variables";
+
+body, html {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+
+  color: $text;
+  background-color: $background;
+  margin: 0;
+}
+
+#app {
+  margin: 40px;
 }
 </style>
