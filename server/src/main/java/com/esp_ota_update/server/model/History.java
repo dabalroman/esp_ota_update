@@ -26,16 +26,16 @@ public class History {
         return deviceId;
     }
 
+    public void setDeviceId(Integer deviceId) {
+        this.deviceId = deviceId;
+    }
+
     public Integer getUpdateId() {
         return updateId;
     }
 
     public void setUpdateId(Integer updateId) {
         this.updateId = updateId;
-    }
-
-    public void setDeviceId(Integer deviceId) {
-        this.deviceId = deviceId;
     }
 
     public LocalDateTime getTimestamp() {
@@ -59,7 +59,7 @@ public class History {
     }
 
     public void setBaseVersion(String baseVersion) {
-        this.baseVersion = baseVersion;
+        this.baseVersion = Software.extractVersionFromNameString(baseVersion);
     }
 
     public String getBaseMd5() {
@@ -91,7 +91,7 @@ public class History {
     }
 
     public void setToVersion(String toVersion) {
-        this.toVersion = toVersion;
+        this.toVersion = Software.extractVersionFromNameString(toVersion);
     }
 
     public String getToMd5() {
