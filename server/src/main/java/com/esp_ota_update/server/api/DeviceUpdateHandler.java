@@ -62,13 +62,13 @@ public class DeviceUpdateHandler {
     @GetMapping
     public ResponseEntity<byte[]> handleDeviceUpdate(@RequestHeader Map<String, String> headers) {
         if (!this.verifyHeaders(headers)) {
-            System.out.println("\nUpdate request denied - wrong headers.");
+            Log.log("\nUpdate request denied - wrong headers.");
             return new BinaryResponse(HttpStatus.FORBIDDEN).responseEntity();
         }
 
         scanSoftwareFolder();
 
-        System.out.println("\nUpdate request from " + headers.get(HEADER_DEVICE_MAC) + ", version "
+        Log.log("\nUpdate request from " + headers.get(HEADER_DEVICE_MAC) + ", version "
                 + headers.get(HEADER_SOFTWARE_VERSION));
 
         try {
@@ -83,13 +83,13 @@ public class DeviceUpdateHandler {
                 device.setVersion(Software.extractVersionFromNameString(headers.get(HEADER_SOFTWARE_VERSION)));
                 deviceService.addDevice(device);
 
-                System.out.println("    OK. Introduced new device " + device.getName());
+                Log.log("OK. Introduced new device " + device.getName(), 1);
                 return new BinaryResponse(HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
             //Known device path
             Device device = deviceAsList.get(0);
-            System.out.println("    Device recognized as " + device.getName());
+            Log.log("Device recognized as " + device.getName(), 1);
 
             List<Update> updateAsList = deviceUpdateService.getLatestDeviceUpdate(device.getId());
             boolean firstUpdate = updateAsList.isEmpty();
@@ -108,11 +108,11 @@ public class DeviceUpdateHandler {
                         device.setVersion(Software.extractVersionFromNameString(lastSoftware.getVersion()));
                         device.setLastSoftwareUpdate();
 
-                        System.out.println("    INFO: Successful update to version " + lastSoftware.getVersion());
+                        Log.log("INFO: Successful update to version " + lastSoftware.getVersion(), 1);
                     } else {
                         lastUpdate.setStatus(Update.STATUS_ERROR);
 
-                        System.out.println("    INFO: Unsuccessful update to version " + lastSoftware.getVersion());
+                        Log.log("INFO: Unsuccessful update to version " + lastSoftware.getVersion(), 1);
                     }
 
                     deviceUpdateService.updateDeviceUpdate(lastUpdate);
@@ -127,7 +127,7 @@ public class DeviceUpdateHandler {
                 device.setStatus(Device.STATUS_NO_SOFTWARE);
                 deviceService.updateDevice(device);
 
-                System.out.println("    WARNING: No software found.");
+                Log.log("WARNING: No software found.", 1);
                 return new BinaryResponse(HttpStatus.NOT_MODIFIED).responseEntity();
             }
 
@@ -146,8 +146,8 @@ public class DeviceUpdateHandler {
                     device.setLastSoftwareCheck();
                     deviceService.updateDevice(device);
 
-                    System.out.println("    OK. No update found (" + latestAvailableSoftware.getVersion()
-                            + " <= " + headers.get(HEADER_SOFTWARE_VERSION) + ")");
+                    Log.log("OK. No update found (" + latestAvailableSoftware.getVersion()
+                            + " <= " + headers.get(HEADER_SOFTWARE_VERSION) + ")", 1);
                     return new BinaryResponse(HttpStatus.NOT_MODIFIED).responseEntity();
                 }
 
@@ -176,7 +176,7 @@ public class DeviceUpdateHandler {
             responseHeaders.set("Content-Length", String.valueOf(binaries.length));
             responseHeaders.set("x-MD5", latestAvailableSoftware.getMd5());
 
-            System.out.println("    OK. Updating device to version " + latestAvailableSoftware.getVersion());
+            Log.log("OK. Updating device to version " + latestAvailableSoftware.getVersion(), 1);
             return new BinaryResponse(HttpStatus.OK, responseHeaders, binaries).responseEntity();
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,22 +187,56 @@ public class DeviceUpdateHandler {
 
     @Scheduled(fixedDelay = 300000, initialDelay = 5000)
     public void scanSoftwareFolder() {
-        System.out.println("\nFile scanner started.");
+        Log.log("\nFile scanner started.");
         File[] files = new File(Software.SOFTWARE_DIRECTORY_PATH).listFiles();
 
         if (files != null) {
             for (File file : files) {
                 processSoftwareFile(file);
+                Log.log();
             }
         }
     }
 
     private void processSoftwareFile(File softwareFile) {
-        System.out.print("    " + softwareFile.getName() + " - ");
+        Log.log(softwareFile.getName(), 1);
+
+        if (!softwareFile.getName().endsWith(".bin")) {
+            Log.log("ERR: Wrong file extension.", 2);
+            return;
+        }
+
+        String versionNameFromBinaryInsides = scanFileContentsForVersionName(softwareFile);
+
+        if (versionNameFromBinaryInsides != null) {
+            String fileNameFromBinaryInsides = versionNameFromBinaryInsides + ".bin";
+            Log.log("Software version: " + versionNameFromBinaryInsides, 2);
+
+            if (!softwareFile.getName().equals(fileNameFromBinaryInsides)) {
+                File renameTarget = new File(Software.SOFTWARE_DIRECTORY_PATH + "\\" + fileNameFromBinaryInsides);
+
+                if (!renameTarget.exists()) {
+                    boolean renamed = softwareFile.renameTo(renameTarget);
+
+                    if (renamed) {
+                        softwareFile = renameTarget;
+                        Log.log("File renamed to " + softwareFile.getName(), 2);
+                    } else {
+                        Log.log("Can't rename file (I/O error).", 2);
+                    }
+                } else {
+                    Log.log("Can't rename file (target exists).", 2);
+                }
+            } else {
+                Log.log("Filename is valid.", 2);
+            }
+        } else {
+            Log.log("Can't confirm software version.", 2);
+        }
 
         String softwareName = softwareFile.getName().substring(0, softwareFile.getName().length() - 4);
         if (!Software.isValidVersionName(softwareName)) {
-            System.out.println("ERR: Invalid file name.");
+            Log.log("ERR: Invalid file name.", 2);
             return;
         }
 
@@ -212,7 +246,7 @@ public class DeviceUpdateHandler {
         List<Device> deviceList = deviceService.getDeviceBySoftwareName(softwareNameScheme);
 
         if (deviceList.isEmpty()) {
-            System.out.println("ERR: No matching device found.");
+            Log.log("ERR: No matching device found.", 2);
             return;
         }
 
@@ -231,23 +265,22 @@ public class DeviceUpdateHandler {
                     if (versionCompareResult == 0) {
                         //Found previous version
                         if (sameHash) {
-                            System.out.println("OK. Found previous record of this software version.");
+                            Log.log("OK. Found previous records of this software version.", 2);
 
                             if (device.getLastSoftwareUpdate().isBefore(s.getCreatedAt())) {
                                 device.setStatus(Device.STATUS_NEEDS_UPDATE);
                                 deviceService.updateDevice(device);
                             }
                         } else {
-                            System.out.println("ERR: Found previous software with different hash!");
+                            Log.log("ERR: Found previous software with different hash!", 2);
                         }
                         return;
                     }
 
                     if (versionCompareResult == 1) {
                         //Found higher version
-                        System.out.println(
-                                "ERR: Found record of higher version (" + s.getVersion() + ") of this software."
-                        );
+                        Log.log("ERR: Found previous records of higher version ("
+                                + s.getVersion() + ") of this software.", 2);
                         return;
                     }
 
@@ -259,13 +292,13 @@ public class DeviceUpdateHandler {
                     }
                 }
             } catch (Exception e) {
-                System.out.println("ERR: Database error.");
+                Log.log("ERR: Database error.", 2);
                 return;
             }
         }
 
         if (sameHash) {
-            System.out.print("WARNING: Software with same hash already exists in database; ");
+            Log.log("WARNING: Software with same hash already exists in database.", 2);
         }
 
         //New version or no software for device found
@@ -283,7 +316,7 @@ public class DeviceUpdateHandler {
         device.setStatus(Device.STATUS_NEEDS_UPDATE);
         deviceService.updateDevice(device);
 
-        System.out.println("OK. Created new software record.");
+        Log.log("OK. Created new software record.", 2);
     }
 
     /**
@@ -371,9 +404,9 @@ public class DeviceUpdateHandler {
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
-        System.out.println("\nRequest headers:");
+        Log.log("\nRequest headers:");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            System.out.println("    " + entry.getKey() + ": " + entry.getValue());
+            Log.log("" + entry.getKey() + ": " + entry.getValue(), 1);
         }
 
         if (headers.get(HEADER_USER_AGENT) == null
