@@ -69,6 +69,10 @@ public class Software {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static String extractVersionFromNameString(String nameString) {
+        if (nameString == null) {
+            return null;
+        }
+
         Matcher m = Pattern.compile(Software.VERSION_REGEX).matcher(nameString);
         m.matches();
         return m.group(2);
@@ -76,6 +80,10 @@ public class Software {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static String extractNameFromNameString(String nameString) {
+        if (nameString == null) {
+            return null;
+        }
+
         Matcher m = Pattern.compile(Software.VERSION_REGEX).matcher(nameString);
         m.matches();
         return m.group(1);
