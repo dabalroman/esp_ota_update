@@ -35,8 +35,12 @@ export default class Device {
     return this.statusMap[this._status];
   }
 
+  get statusClass () {
+    return this.statusClassMap[this._status];
+  }
+
   get softwareVersion () {
-    return this._softwareVersion ?? '-';
+    return this._softwareVersion ?? 'Unknown';
   }
 
   get lastSoftwareCheck () {
@@ -45,9 +49,5 @@ export default class Device {
 
   get lastSoftwareUpdate () {
     return DateUtility.formatDateString(this._lastSoftwareUpdate);
-  }
-
-  get statusClass () {
-    return this.statusClassMap[this._status];
   }
 }

@@ -1,10 +1,5 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link>
-      |
-      <router-link to="/1">1</router-link>
-    </div>
     <b-container>
       <router-view/>
     </b-container>
@@ -32,5 +27,18 @@ body, html {
 
 #app {
   margin: 40px;
+}
+
+.link {
+  color: $text;
+  text-decoration: none;
+  text-shadow: none;
+
+  &:hover {
+    color: #fff;
+    transition: 0.2s;
+    text-decoration: none;
+    text-shadow: $background 2px 2px;
+  }
 }
 </style>

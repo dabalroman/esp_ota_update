@@ -1,6 +1,6 @@
 <template>
   <div class="devices">
-    <table class="table table-striped table-hover table-dark table-borderless">
+    <table class="table table-hover table-dark table-borderless">
       <thead>
       <tr>
         <th>#</th>
@@ -13,10 +13,19 @@
       <tbody>
       <tr v-for="(device, key) in devices" :key="device.id">
         <td>{{ key + 1 }}</td>
-        <td>{{ device.name }}</td>
+        <td>
+          <router-link class="link" :to="{ name: 'DeviceDetails', params: { deviceId: device.id }}">
+            {{ device.name }}
+          </router-link>
+        </td>
         <td :class="[device.statusClass, 'text-center']">{{ device.status }}</td>
         <td class="text-center">{{ device.softwareVersion }}</td>
         <td class="text-right">{{ device.lastSoftwareCheck }}</td>
+        <td>
+          <router-link class="link" :to="{ name: 'DeviceDetails', params: { deviceId: device.id }}">
+            <b-icon-arrow-right-circle/>
+          </router-link>
+        </td>
       </tr>
       </tbody>
     </table>
