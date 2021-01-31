@@ -1,7 +1,7 @@
 import DateUtility from '@/utils/DateUtility';
 
 export default class DeviceHistory {
-  statusMap = ['Pending', 'Success', 'Error'];
+  statusMap = ['Updating...', 'Success', 'Error'];
   statusClassMap = ['text-warning', 'text-success', 'text-danger'];
 
   constructor (updateId, deviceId, timestamp, status,

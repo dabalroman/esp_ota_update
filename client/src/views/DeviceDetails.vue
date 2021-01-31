@@ -1,7 +1,5 @@
 <template>
   <div class="deviceDetails">
-    Details of {{ deviceId }}
-
     <table class="table table-hover table-dark table-borderless">
       <tbody>
       <tr v-for="(row, key) in deviceTable" :key="key">

@@ -31,14 +31,10 @@ body, html {
 
 .link {
   color: $text;
-  text-decoration: none;
-  text-shadow: none;
 
   &:hover {
     color: #fff;
-    transition: 0.2s;
-    text-decoration: none;
-    text-shadow: $background 2px 2px;
+    cursor: pointer;
   }
 }
 </style>

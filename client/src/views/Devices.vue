@@ -11,21 +11,14 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(device, key) in devices" :key="device.id">
+      <tr class="link"
+          v-for="(device, key) in devices" :key="device.id"
+          @click="goToDetails(device.id)">
         <td>{{ key + 1 }}</td>
-        <td>
-          <router-link class="link" :to="{ name: 'DeviceDetails', params: { deviceId: device.id }}">
-            {{ device.name }}
-          </router-link>
-        </td>
+        <td>{{ device.name }}</td>
         <td :class="[device.statusClass, 'text-center']">{{ device.status }}</td>
         <td class="text-center">{{ device.softwareVersion }}</td>
         <td class="text-right">{{ device.lastSoftwareCheck }}</td>
-        <td>
-          <router-link class="link" :to="{ name: 'DeviceDetails', params: { deviceId: device.id }}">
-            <b-icon-arrow-right-circle/>
-          </router-link>
-        </td>
       </tr>
       </tbody>
     </table>
@@ -68,6 +61,10 @@ export default {
                 d['lastSoftwareUpdate']
             ));
           });
+    },
+
+    goToDetails (deviceId) {
+      this.$router.push({ name: 'DeviceDetails', params: { deviceId: deviceId } });
     }
   }
 };
