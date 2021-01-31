@@ -6,6 +6,7 @@ import com.esp_ota_update.server.model.Update;
 import com.esp_ota_update.server.service.DeviceService;
 import com.esp_ota_update.server.service.DeviceUpdateService;
 import com.esp_ota_update.server.service.SoftwareService;
+import com.esp_ota_update.server.util.Log;
 import com.esp_ota_update.server.util.MD5Checksum;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -280,6 +284,90 @@ public class DeviceUpdateHandler {
         deviceService.updateDevice(device);
 
         System.out.println("OK. Created new software record.");
+    }
+
+    /**
+     * Scan binary file for valid version name
+     *
+     * @param softwareFile File
+     * @return String name of version found inside binary file or null
+     */
+    private String scanFileContentsForVersionName(File softwareFile) {
+        int PAUSE = 0x0;
+        int DOT = 0x2E;
+        int ZERO = 0x30;
+        int NINE = 0x39;
+        int A = 0x41;
+        int Z = 0x5A;
+        int a = 0x61;
+        int z = 0x7A;
+        int UNDERSCORE = 0x5F;
+
+        try {
+            byte[] content = Files.readAllBytes(Path.of(softwareFile.getAbsolutePath()));
+
+            Log.log("Size: " + (content.length / 1024) + " KB", 2);
+
+            int pointer = 0;
+            StringBuilder word = new StringBuilder();
+
+            int underscores_amount = 0;  //Target: >= 1
+            int dots_amount = 0;         //Target: >= 2
+
+            while (pointer < content.length) {
+                byte val = content[pointer++];
+
+                if (val == PAUSE) {
+                    // 6 = length of "_#.#.#"
+                    if (word.length() >= 6 && underscores_amount >= 1 && dots_amount >= 2) {
+                        break;
+                    }
+
+                    word.delete(0, word.length());
+                    underscores_amount = 0;
+                    dots_amount = 0;
+                    continue;
+                }
+
+                //Test for [A-Za-z0-9_]
+                if (!(
+                        (val >= A && val <= Z)
+                                || (val >= a && val <= z)
+                                || (val >= ZERO && val <= NINE)
+                                || val == UNDERSCORE
+                                || val == DOT)
+                ) {
+                    word.delete(0, word.length());
+                    underscores_amount = 0;
+                    dots_amount = 0;
+                    continue;
+                }
+
+                //Get rid of all one char strings
+                if (word.isEmpty() && pointer < content.length && content[pointer] == PAUSE) {
+                    continue;
+                }
+
+                if (val == DOT) {
+                    dots_amount++;
+                }
+
+                if (val == UNDERSCORE) {
+                    underscores_amount++;
+                }
+
+                word.append((char) val);
+            }
+
+            if (word.isEmpty()) {
+                return null;
+            }
+
+            return word.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private boolean verifyHeaders(Map<String, String> headers) {
