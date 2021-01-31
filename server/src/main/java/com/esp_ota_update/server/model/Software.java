@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Software {
-    public static final String VERSION_REGEX = "^([A-z_]*)_(\\d+\\.\\d+\\.\\d+)$";
+    public static final String VERSION_REGEX = "^([A-z0-9_]*)_(\\d+\\.\\d+\\.\\d+)$";
     public static final String SOFTWARE_DIRECTORY_PATH = "C:\\localhost\\espota\\";
 
     private final Integer id;
